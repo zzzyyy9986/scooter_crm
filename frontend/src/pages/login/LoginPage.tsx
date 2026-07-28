@@ -102,8 +102,8 @@ export const LoginPage = observer(function LoginPage() {
             </button>
           </form>
 
-          <p className="text-muted small text-center mt-4 mb-0">
-            admin@scooter-crm.local / password
+          <p className="text-danger small text-center mt-4 mb-0 fw-semibold">
+            Доступы для входа: Логин: admin@scooter-crm.local Пароль: password
           </p>
 
           {adminerUrl && (
