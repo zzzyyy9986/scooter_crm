@@ -82,25 +82,17 @@ docker compose up --build
 
 ### Production (сервер, Git + Docker)
 
-**MySQL и Nginx уже на VPS** — режим `external` (по умолчанию в `.env.prod.example`):
+**Nginx на VPS, MySQL в Docker** (системный MySQL не затрагивается):
 
 ```bash
 git clone https://github.com/zzzyyy9986/scooter_crm.git scooter-crm
 cd scooter-crm
-
-mysql -u root -p < scripts/init-host-mysql.sql   # подготовить БД
-cp .env.prod.example .env
-nano .env
-
-chmod +x deploy.sh
-./deploy.sh
-
-# Nginx на хосте — см. nginx/host.conf.example
+cp .env.prod.example .env && nano .env
+chmod +x deploy.sh && ./deploy.sh
+# Nginx на хосте — nginx/host.conf.example
 ```
 
 Подробно: [DEPLOY.md](DEPLOY.md)
-
-**Чистый VPS без MySQL/Nginx** — в `.env` переключите на `DEPLOY_MODE=standalone`.
 
 ## Быстрый запуск
 
@@ -151,15 +143,14 @@ docker compose down -v
 
 Подробная инструкция: [DEPLOY.md](DEPLOY.md)
 
-**MySQL и Nginx уже на VPS** (режим `external`):
+**Nginx на VPS, MySQL в Docker** (хостовый MySQL не трогаем):
 
 ```bash
 git clone https://github.com/zzzyyy9986/scooter_crm.git scooter-crm
 cd scooter-crm
-mysql -u root -p < scripts/init-host-mysql.sql
 cp .env.prod.example .env && nano .env
 ./deploy.sh
-# затем nginx/host.conf.example → конфиг Nginx на хосте
+# nginx/host.conf.example → конфиг Nginx на хосте
 ```
 
 Обновление: `./deploy.sh`

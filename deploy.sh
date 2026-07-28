@@ -38,11 +38,9 @@ if [ -z "${MYSQL_PASSWORD:-}" ]; then
   exit 1
 fi
 
-if [ "${DEPLOY_MODE}" = "standalone" ]; then
-  if [ -z "${MYSQL_ROOT_PASSWORD:-}" ]; then
-    echo "В режиме standalone задайте MYSQL_ROOT_PASSWORD в .env"
-    exit 1
-  fi
+if [ -z "${MYSQL_ROOT_PASSWORD:-}" ]; then
+  echo "Задайте MYSQL_ROOT_PASSWORD в .env"
+  exit 1
 fi
 
 if [ ! -f frontend/.env.production ]; then
