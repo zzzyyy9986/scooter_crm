@@ -47,11 +47,66 @@ Web-интерфейс: http://localhost:8080
 - Docker Desktop для macOS (Apple Silicon)
 - Git
 
+## Переменные окружения (.env)
+
+Файлы `.env` **не хранятся в git** — в репозитории только шаблоны. После `git clone` их нужно создать вручную.
+
+| Файл | В git | Назначение |
+|------|-------|------------|
+| `backend/.env.example` | ✅ | Шаблон для Laravel (локально) |
+| `frontend/.env.example` | ✅ | Шаблон для Vite (локально) |
+| `.env.prod.example` | ✅ | Шаблон для production-деплоя |
+| `backend/.env` | ❌ | Локальный backend |
+| `frontend/.env.development` | ❌ | Локальный frontend (Vite dev) |
+| `frontend/.env.production` | ❌ | Production-сборка frontend |
+| `.env` (корень) | ❌ | Production: Docker Compose на сервере |
+
+### Локальная разработка
+
+```bash
+git clone <repository-url> scooter-crm
+cd scooter-crm
+
+# Frontend: URL backend API для Vite
+cp frontend/.env.example frontend/.env.development
+
+# Backend: Docker создаст backend/.env из .env.example при первом запуске
+docker compose up --build
+```
+
+Корневой `.env` для локальной разработки **не нужен** — переменные заданы в `docker-compose.yml`.
+
+### Production (сервер)
+
+```bash
+git clone <repository-url> scooter-crm
+cd scooter-crm
+
+# Корневой .env для docker-compose.prod.yml
+cp .env.prod.example .env
+nano .env   # APP_KEY, APP_URL, MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD
+
+# Frontend: API через nginx на том же домене
+echo "VITE_API_URL=/api" > frontend/.env.production
+
+chmod +x deploy.sh
+./deploy.sh
+```
+
+Обязательные поля в `.env` на сервере:
+
+- `APP_KEY` — сгенерировать (см. [DEPLOY.md](DEPLOY.md))
+- `APP_URL` — IP или домен сервера
+- `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` — надёжные пароли
+
+Отдельный `backend/.env` на сервере **не нужен** — backend получает переменные из корневого `.env` через Docker.
+
 ## Быстрый запуск
 
 ```bash
 git clone <repository-url> scooter-crm
 cd scooter-crm
+cp frontend/.env.example frontend/.env.development
 docker compose up --build
 ```
 
@@ -69,9 +124,13 @@ docker compose up --build
 ### Проверка API
 
 ```bash
-curl http://localhost:8000/api/analytics
-curl http://localhost:8000/api/scooters
-curl http://localhost:8000/api/rentals
+# Сначала получите token
+curl -X POST http://localhost:8000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@scooter-crm.local","password":"password"}'
+
+curl http://localhost:8000/api/analytics \
+  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ## Остановка
@@ -88,14 +147,13 @@ docker compose down -v
 
 ## Деплой на сервер (Ubuntu + Docker)
 
-Инструкция: [DEPLOY.md](DEPLOY.md)
-
-Кратко:
+Подробная инструкция: [DEPLOY.md](DEPLOY.md)
 
 ```bash
 git clone <repository-url> scooter-crm
 cd scooter-crm
-cp .env.prod.example .env   # заполнить APP_KEY, пароли, APP_URL
+cp .env.prod.example .env          # заполнить APP_KEY, пароли, APP_URL
+echo "VITE_API_URL=/api" > frontend/.env.production
 chmod +x deploy.sh
 ./deploy.sh
 ```
