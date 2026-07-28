@@ -19,7 +19,7 @@ class Rental extends Model
 
     protected $fillable = [
         'scooter_id',
-        'user_id',
+        'client_id',
         'started_at',
         'ended_at',
         'status',
@@ -41,12 +41,12 @@ class Rental extends Model
     }
 
     /**
-     * Связь: аренда принадлежит одному пользователю-арендатору.
+     * Связь: аренда принадлежит клиенту (арендатору самоката).
      *
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<Client, $this>
      */
-    public function user(): BelongsTo
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Client::class);
     }
 }

@@ -161,8 +161,9 @@ scooter-crm/
 
 - `scooter_models` — справочник моделей (Xiaomi Pro 2, Ninebot Max, …)
 - `scooters` — конкретные самокаты (`number`, `scooter_model_id`, статус, заряд, координаты)
-- `rentals` — аренды
-- `users` — пользователи CRM
+- `users` — пользователи CRM (админы, вход по email)
+- `clients` — клиенты аренды (имя + телефон)
+- `rentals` — аренды (связь с `clients`, не с `users`)
 
 ## API Endpoints
 

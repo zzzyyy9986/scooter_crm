@@ -12,15 +12,25 @@ use Illuminate\Validation\ValidationException;
 
 class RentalService
 {
+    private ClientService $clientService;
+
     /**
-     * Возвращает список аренд с загруженными самокатом и пользователем.
+     * @param ClientService $clientService Сервис клиентов аренды.
+     */
+    public function __construct(ClientService $clientService)
+    {
+        $this->clientService = $clientService;
+    }
+
+    /**
+     * Возвращает список аренд с загруженными самокатом и клиентом.
      *
      * @param string|null $status Фильтр по статусу (active | completed).
      * @return Collection<int, Rental> Коллекция аренд, от новых к старым.
      */
     public function list(?string $status = null): Collection
     {
-        $query = Rental::with(['scooter.scooterModel', 'user'])->orderByDesc('started_at');
+        $query = Rental::with(['scooter.scooterModel', 'client'])->orderByDesc('started_at');
 
         if ($status) {
             $query->where('status', $status);
@@ -30,16 +40,21 @@ class RentalService
     }
 
     /**
-     * Создаёт аренду в транзакции: блокирует самокат, проверяет доступность, меняет статус на in_use.
+     * Создаёт аренду в транзакции: находит или создаёт клиента, блокирует самокат.
      *
-     * @param RentalData $rentalData ID самоката и пользователя-арендатора.
-     * @return Rental Созданная аренда с relations scooter и user.
+     * @param RentalData $rentalData ID самоката, телефон и имя клиента.
+     * @return Rental Созданная аренда с relations scooter и client.
      *
      * @throws ValidationException Если самокат недоступен или уже в аренде.
      */
     public function create(RentalData $rentalData): Rental
     {
         return DB::transaction(function () use ($rentalData) {
+            $client = $this->clientService->findOrCreateByPhone(
+                $rentalData->phone,
+                $rentalData->name,
+            );
+
             $scooter = Scooter::lockForUpdate()->findOrFail($rentalData->scooter_id);
 
             if ($scooter->status !== Scooter::STATUS_AVAILABLE) {
@@ -58,22 +73,22 @@ class RentalService
 
             return Rental::create([
                 'scooter_id' => $scooter->id,
-                'user_id' => $rentalData->user_id,
+                'client_id' => $client->id,
                 'started_at' => now(),
                 'status' => Rental::STATUS_ACTIVE,
-            ])->load(['scooter.scooterModel', 'user']);
+            ])->load(['scooter.scooterModel', 'client']);
         });
     }
 
     /**
-     * Возвращает аренду с загруженными самокатом и пользователем.
+     * Возвращает аренду с загруженными самокатом и клиентом.
      *
      * @param Rental $rental Модель аренды.
      * @return Rental Аренда с relations.
      */
     public function find(Rental $rental): Rental
     {
-        return $rental->load(['scooter.scooterModel', 'user']);
+        return $rental->load(['scooter.scooterModel', 'client']);
     }
 
     /**
@@ -99,6 +114,6 @@ class RentalService
             $rental->scooter->update(['status' => Scooter::STATUS_AVAILABLE]);
         });
 
-        return $rental->fresh()->load(['scooter.scooterModel', 'user']);
+        return $rental->fresh()->load(['scooter.scooterModel', 'client']);
     }
 }

@@ -36,7 +36,7 @@ class RentalController extends Controller
     /**
      * POST /api/rentals — создание новой аренды.
      *
-     * @param StoreRentalRequest $request Валидированные scooter_id и user_id.
+     * @param StoreRentalRequest $request Валидированные scooter_id, phone и name клиента.
      * @return JsonResponse Созданная аренда с relations (HTTP 201).
      */
     public function store(StoreRentalRequest $request): JsonResponse

@@ -1,10 +1,11 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { QueryService } from '../services/QueryService';
-import type { Rental, RentalFormData } from '../types/api';
+import type { Client, Rental, RentalFormData } from '../types/api';
 import type { ScooterStore } from './ScooterStore';
 import { FetchGuard } from './fetchGuard';
 import { notificationStore } from './NotificationStore';
-import type { UserStore } from './UserStore';
+
+const CLIENT_SEARCH_DEBOUNCE_MS = 300;
 
 /** MobX-store списка аренд и операций с ними. */
 export class RentalStore {
@@ -13,10 +14,13 @@ export class RentalStore {
   statusFilter = '';
 
   isCreateModalOpen = false;
-  formData = { scooter_id: '', user_id: '' };
+  formData = { scooter_id: '', phone: '', name: '' };
   formSubmitting = false;
+  clientSearchLoading = false;
+  clientSuggestions: Client[] = [];
 
   private fetchGuard = new FetchGuard();
+  private phoneSearchTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   /** Регистрирует store как observable для MobX. */
   public constructor() {
@@ -41,34 +45,77 @@ export class RentalStore {
   }
 
   /**
-   * Открывает модальное окно создания аренды и загружает справочники.
+   * Открывает модальное окно создания аренды и загружает доступные самокаты.
    * @param scooterStore - Store самокатов.
-   * @param userStore - Store пользователей.
    */
-  public async openCreateModal(scooterStore: ScooterStore, userStore: UserStore): Promise<void> {
+  public async openCreateModal(scooterStore: ScooterStore): Promise<void> {
     this.isCreateModalOpen = true;
-    this.formData = { scooter_id: '', user_id: '' };
+    this.formData = { scooter_id: '', phone: '', name: '' };
     this.formSubmitting = false;
+    this.clientSearchLoading = false;
+    this.clientSuggestions = [];
 
-    await Promise.all([scooterStore.prepareAvailableScooters(), userStore.fetchUsers()]);
+    await scooterStore.prepareAvailableScooters();
   }
 
   /** Закрывает модальное окно создания аренды. */
   public closeCreateModal(): void {
     this.isCreateModalOpen = false;
     this.formSubmitting = false;
+    this.clientSearchLoading = false;
+    this.clientSuggestions = [];
+    this.clearPhoneSearchTimeout();
   }
 
   /**
    * Обновляет поле формы создания аренды.
-   * @param fieldName - Имя поля (`scooter_id` или `user_id`).
+   * @param fieldName - Имя поля формы.
    * @param fieldValue - Значение поля.
    */
-  public setFormField(fieldName: 'scooter_id' | 'user_id', fieldValue: string): void {
+  public setFormField(
+    fieldName: 'scooter_id' | 'phone' | 'name',
+    fieldValue: string,
+  ): void {
+    if (fieldName === 'phone') {
+      if (fieldValue.trim() === '') {
+        this.formData = { ...this.formData, phone: '', name: '' };
+        this.clientSuggestions = [];
+        this.clientSearchLoading = false;
+        this.clearPhoneSearchTimeout();
+        return;
+      }
+
+      this.formData = { ...this.formData, phone: fieldValue };
+      this.scheduleClientSearch(fieldValue);
+      return;
+    }
+
+    this.formData = { ...this.formData, [fieldName]: fieldValue };
+  }
+
+  /**
+   * Выбирает клиента из списка подсказок и заполняет телефон и имя.
+   * @param client - Клиент из подсказок.
+   */
+  public selectClientSuggestion(client: Client): void {
     this.formData = {
       ...this.formData,
-      [fieldName]: fieldValue,
+      phone: client.phone,
+      name: client.name,
     };
+    this.clientSuggestions = [];
+  }
+
+  /**
+   * Запускает поиск клиентов с debounce при вводе телефона.
+   * @param phone - Частичный номер телефона.
+   */
+  public scheduleClientSearch(phone: string): void {
+    this.clearPhoneSearchTimeout();
+
+    this.phoneSearchTimeoutId = setTimeout(() => {
+      void this.searchClientsByPhone(phone);
+    }, CLIENT_SEARCH_DEBOUNCE_MS);
   }
 
   /**
@@ -80,7 +127,8 @@ export class RentalStore {
 
     const rentalFormData: RentalFormData = {
       scooter_id: parseInt(this.formData.scooter_id, 10),
-      user_id: parseInt(this.formData.user_id, 10),
+      phone: this.formData.phone.trim(),
+      name: this.formData.name.trim(),
     };
 
     try {
@@ -113,6 +161,44 @@ export class RentalStore {
   }
 
   /**
+   * Ищет до 10 клиентов по началу номера телефона.
+   * @param phone - Частичный номер из формы.
+   */
+  private async searchClientsByPhone(phone: string): Promise<void> {
+    runInAction(() => {
+      this.clientSearchLoading = true;
+    });
+
+    try {
+      const clients = await QueryService.getRequest<Client[]>('/clients/search', {
+        phone: phone.trim(),
+      });
+
+      runInAction(() => {
+        this.clientSuggestions = clients;
+        this.clientSearchLoading = false;
+
+        if (clients.length === 1) {
+          this.formData = { ...this.formData, name: clients[0].name };
+        }
+      });
+    } catch {
+      runInAction(() => {
+        this.clientSuggestions = [];
+        this.clientSearchLoading = false;
+      });
+    }
+  }
+
+  /** Отменяет отложенный поиск клиентов. */
+  private clearPhoneSearchTimeout(): void {
+    if (this.phoneSearchTimeoutId !== null) {
+      clearTimeout(this.phoneSearchTimeoutId);
+      this.phoneSearchTimeoutId = null;
+    }
+  }
+
+  /**
    * Внутренний метод: выполняет GET `/rentals` и обновляет `items`.
    */
   private async loadRentalsList(): Promise<void> {
@@ -136,7 +222,7 @@ export class RentalStore {
 
   /**
    * Создаёт новую аренду и перезагружает список.
-   * @param rentalFormData - Данные формы: scooter_id, user_id.
+   * @param rentalFormData - Данные формы: scooter_id, phone, name.
    */
   private async createRental(rentalFormData: RentalFormData): Promise<void> {
     await QueryService.postRequest<Rental>('/rentals', rentalFormData);

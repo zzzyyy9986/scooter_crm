@@ -15,7 +15,8 @@ class StoreRentalRequest extends AuthorizedApiRequest
     {
         return [
             'scooter_id' => ['required', 'integer', 'exists:scooters,id'],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'phone' => ['required', 'string', 'min:10', 'max:20'],
+            'name' => ['required', 'string', 'max:255'],
         ];
     }
 

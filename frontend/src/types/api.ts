@@ -37,6 +37,12 @@ export interface User {
   email: string;
 }
 
+export interface Client {
+  id: number;
+  name: string;
+  phone: string;
+}
+
 export interface LoginFormData {
   email: string;
   password: string;
@@ -50,17 +56,18 @@ export interface LoginResponse {
 export interface Rental {
   id: number;
   scooter_id: number;
-  user_id: number;
+  client_id: number;
   started_at: string;
   ended_at: string | null;
   status: RentalStatus;
   scooter?: Scooter;
-  user?: User;
+  client?: Client;
 }
 
 export interface RentalFormData {
   scooter_id: number;
-  user_id: number;
+  phone: string;
+  name: string;
 }
 
 export interface Analytics {

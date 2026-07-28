@@ -4,7 +4,6 @@ import { authStore } from './AuthStore';
 import { notificationStore } from './NotificationStore';
 import { rentalStore } from './RentalStore';
 import { scooterStore } from './ScooterStore';
-import { userStore } from './UserStore';
 
 /** React Context с singleton-экземплярами MobX store. */
 export const RootStoreContext = createContext({
@@ -12,7 +11,6 @@ export const RootStoreContext = createContext({
   analyticsStore,
   scooterStore,
   rentalStore,
-  userStore,
   notificationStore,
 });
 

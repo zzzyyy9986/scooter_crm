@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Client;
 use App\Models\Rental;
 use App\Models\Scooter;
 use App\Models\ScooterModel;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Заполняет БД тестовыми пользователями, моделями, самокатами и арендами.
+     * Заполняет БД тестовыми пользователями CRM, клиентами, самокатами и арендами.
      */
     public function run(): void
     {
@@ -24,20 +25,19 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        $ivan = User::firstOrCreate(
-            ['email' => 'ivan@example.com'],
-            [
-                'name' => 'Иван Петров',
-                'password' => Hash::make('password'),
-            ],
+        $ivan = Client::firstOrCreate(
+            ['phone' => '+79001234567'],
+            ['name' => 'Иван Петров'],
         );
 
-        $maria = User::firstOrCreate(
-            ['email' => 'maria@example.com'],
-            [
-                'name' => 'Мария Сидорова',
-                'password' => Hash::make('password'),
-            ],
+        $maria = Client::firstOrCreate(
+            ['phone' => '+79007654321'],
+            ['name' => 'Мария Сидорова'],
+        );
+
+        Client::firstOrCreate(
+            ['phone' => '+79003112233'],
+            ['name' => 'Алексей Козлов'],
         );
 
         if (Scooter::exists()) {
@@ -63,14 +63,14 @@ class DatabaseSeeder extends Seeder
 
         Rental::create([
             'scooter_id' => 2,
-            'user_id' => $ivan->id,
+            'client_id' => $ivan->id,
             'started_at' => now()->subHours(2),
             'status' => 'active',
         ]);
 
         Rental::create([
             'scooter_id' => 1,
-            'user_id' => $maria->id,
+            'client_id' => $maria->id,
             'started_at' => now()->subDays(1),
             'ended_at' => now()->subHours(20),
             'status' => 'completed',

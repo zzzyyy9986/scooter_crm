@@ -8,7 +8,7 @@ import { RentalForm } from './RentalForm';
 
 /** Страница управления арендами: список, фильтр, создание и завершение. */
 export const RentalsPage = observer(function RentalsPage() {
-  const { rentalStore, scooterStore, userStore } = useRootStore();
+  const { rentalStore, scooterStore } = useRootStore();
 
   useEffect(() => {
     void rentalStore.fetchRentals();
@@ -20,7 +20,7 @@ export const RentalsPage = observer(function RentalsPage() {
       actions={
         <button
           className="btn btn-primary"
-          onClick={() => void rentalStore.openCreateModal(scooterStore, userStore)}
+          onClick={() => void rentalStore.openCreateModal(scooterStore)}
         >
           + Новая аренда
         </button>
@@ -59,8 +59,8 @@ export const RentalsPage = observer(function RentalsPage() {
                 <tr>
                   <th>ID</th>
                   <th>Самокат</th>
-                  <th>Пользователь</th>
-                  <th>Email</th>
+                  <th>Клиент</th>
+                  <th>Телефон</th>
                   <th>Начало</th>
                   <th>Окончание</th>
                   <th>Статус</th>
@@ -74,8 +74,8 @@ export const RentalsPage = observer(function RentalsPage() {
                     <td>
                       {rental.scooter?.number} ({rental.scooter?.model})
                     </td>
-                    <td>{rental.user?.name}</td>
-                    <td>{rental.user?.email}</td>
+                    <td>{rental.client?.name}</td>
+                    <td>{rental.client?.phone}</td>
                     <td className="text-muted small">{formatDate(rental.started_at)}</td>
                     <td className="text-muted small">{formatDate(rental.ended_at)}</td>
                     <td>
@@ -115,10 +115,6 @@ export const RentalsPage = observer(function RentalsPage() {
                 <div className="modal-body">
                   {scooterStore.availableScooters.length === 0 ? (
                     <div className="alert alert-warning mb-0">Нет доступных самокатов</div>
-                  ) : userStore.loading ? (
-                    <div className="text-center py-3 text-muted">Загрузка пользователей...</div>
-                  ) : userStore.items.length === 0 ? (
-                    <div className="alert alert-warning mb-0">Нет пользователей для аренды</div>
                   ) : (
                     <RentalForm />
                   )}

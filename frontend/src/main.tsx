@@ -8,7 +8,6 @@ import { authStore } from './store/AuthStore';
 import { notificationStore } from './store/NotificationStore';
 import { rentalStore } from './store/RentalStore';
 import { scooterStore } from './store/ScooterStore';
-import { userStore } from './store/UserStore';
 import './index.css';
 
 /** Инициализирует приложение и восстанавливает сессию пользователя. */
@@ -29,7 +28,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         analyticsStore,
         scooterStore,
         rentalStore,
-        userStore,
         notificationStore,
       }}
     >
