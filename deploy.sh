@@ -23,8 +23,8 @@ fi
 # shellcheck disable=SC1091
 source .env
 
-COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
-DEPLOY_MODE="${DEPLOY_MODE:-standalone}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.external.yml}"
+DEPLOY_MODE="${DEPLOY_MODE:-external}"
 
 if [ -z "${APP_KEY:-}" ]; then
   echo "APP_KEY не задан в .env"
@@ -56,6 +56,24 @@ else
 fi
 
 echo "==> Режим деплоя: ${DEPLOY_MODE} (${COMPOSE_FILE})"
+
+if [ "${COMPOSE_FILE}" = "docker-compose.prod.external.yml" ]; then
+  echo "==> Остановка standalone-контейнеров (nginx на :80), если остались..."
+  docker compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
+fi
+
+if [ "${COMPOSE_FILE}" = "docker-compose.prod.yml" ]; then
+  if ss -tln 2>/dev/null | grep -q ':80 ' || netstat -tln 2>/dev/null | grep -q ':80 '; then
+    echo ""
+    echo "ОШИБКА: порт 80 уже занят (вероятно, Nginx на хосте)."
+    echo "Используйте режим external в .env:"
+    echo "  DEPLOY_MODE=external"
+    echo "  COMPOSE_FILE=docker-compose.prod.external.yml"
+    echo ""
+    exit 1
+  fi
+fi
+
 echo "==> Сборка и запуск контейнеров..."
 docker compose -f "${COMPOSE_FILE}" --env-file .env up -d --build --remove-orphans
 
