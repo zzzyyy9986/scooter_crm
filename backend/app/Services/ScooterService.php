@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Data\ScooterData;
+use App\Data\UpdateScooterData;
 use App\Exceptions\BusinessException;
 use App\Models\Scooter;
 use Illuminate\Support\Collection;
@@ -38,12 +40,12 @@ class ScooterService
     /**
      * Создаёт новый самокат с указанной моделью из справочника.
      *
-     * @param array<string, mixed> $data Валидированные атрибуты самоката и scooter_model_id.
-     * @return Scooter Созданная модель с загруженной моделью.
+     * @param ScooterData $scooterData Валидированные атрибуты самоката.
+     * @return Scooter Созданный самокат с загруженной моделью из справочника.
      */
-    public function create(array $data): Scooter
+    public function create(ScooterData $scooterData): Scooter
     {
-        return Scooter::create($data)->load('scooterModel');
+        return Scooter::create($scooterData->toArray())->load('scooterModel');
     }
 
     /**
@@ -61,22 +63,24 @@ class ScooterService
      * Обновляет атрибуты самоката.
      *
      * @param Scooter $scooter Модель самоката.
-     * @param array<string, mixed> $data Валидированные поля для обновления.
+     * @param UpdateScooterData $scooterData Валидированные поля для обновления.
      * @return Scooter Обновлённая модель из БД.
      */
-    public function update(Scooter $scooter, array $data): Scooter
+    public function update(Scooter $scooter, UpdateScooterData $scooterData): Scooter
     {
+        $payload = $scooterData->toArray();
+
         if ($scooter->activeRental()->exists()) {
-            if (isset($data['status']) && $data['status'] !== Scooter::STATUS_IN_USE) {
+            if (isset($payload['status']) && $payload['status'] !== Scooter::STATUS_IN_USE) {
                 throw new BusinessException(
                     'Нельзя изменить статус самоката, пока у него есть активная аренда.',
                 );
             }
 
-            $data['status'] = Scooter::STATUS_IN_USE;
+            $payload['status'] = Scooter::STATUS_IN_USE;
         }
 
-        $scooter->update($data);
+        $scooter->update($payload);
 
         return $scooter->fresh()->load('scooterModel');
     }

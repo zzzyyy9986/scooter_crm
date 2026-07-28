@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Data\UpdateScooterData;
 use App\Models\Scooter;
 use Illuminate\Validation\Rule;
 
@@ -25,5 +26,13 @@ class UpdateScooterRequest extends AuthorizedApiRequest
             'latitude' => ['sometimes', 'numeric', 'between:-90,90'],
             'longitude' => ['sometimes', 'numeric', 'between:-180,180'],
         ];
+    }
+
+    /**
+     * Возвращает DTO с валидированными данными для обновления самоката.
+     */
+    public function toUpdateScooterData(): UpdateScooterData
+    {
+        return UpdateScooterData::fromValidated($this->validated());
     }
 }

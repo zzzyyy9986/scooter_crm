@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\LoginData;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -11,17 +12,16 @@ class AuthService
     /**
      * Проверяет учётные данные и выдаёт Sanctum API-токен.
      *
-     * @param string $email Email пользователя.
-     * @param string $password Пароль в открытом виде.
+     * @param LoginData $loginData Email и пароль пользователя.
      * @return array{user: User, token: string} Пользователь и plain-text токен.
      *
      * @throws ValidationException Если email или пароль неверны.
      */
-    public function login(string $email, string $password): array
+    public function login(LoginData $loginData): array
     {
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', $loginData->email)->first();
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        if (! $user || ! Hash::check($loginData->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Invalid credentials.'],
             ]);

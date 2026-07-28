@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\RentalData;
 use App\Exceptions\BusinessException;
 use App\Models\Rental;
 use App\Models\Scooter;
@@ -31,15 +32,15 @@ class RentalService
     /**
      * Создаёт аренду в транзакции: блокирует самокат, проверяет доступность, меняет статус на in_use.
      *
-     * @param array{scooter_id: int, user_id: int} $data ID самоката и пользователя-арендатора.
+     * @param RentalData $rentalData ID самоката и пользователя-арендатора.
      * @return Rental Созданная аренда с relations scooter и user.
      *
      * @throws ValidationException Если самокат недоступен или уже в аренде.
      */
-    public function create(array $data): Rental
+    public function create(RentalData $rentalData): Rental
     {
-        return DB::transaction(function () use ($data) {
-            $scooter = Scooter::lockForUpdate()->findOrFail($data['scooter_id']);
+        return DB::transaction(function () use ($rentalData) {
+            $scooter = Scooter::lockForUpdate()->findOrFail($rentalData->scooter_id);
 
             if ($scooter->status !== Scooter::STATUS_AVAILABLE) {
                 throw ValidationException::withMessages([
@@ -57,7 +58,7 @@ class RentalService
 
             return Rental::create([
                 'scooter_id' => $scooter->id,
-                'user_id' => $data['user_id'],
+                'user_id' => $rentalData->user_id,
                 'started_at' => now(),
                 'status' => Rental::STATUS_ACTIVE,
             ])->load(['scooter.scooterModel', 'user']);

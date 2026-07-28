@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Data\ScooterModelData;
+
 class StoreScooterModelRequest extends AuthorizedApiRequest
 {
     /**
@@ -14,5 +16,13 @@ class StoreScooterModelRequest extends AuthorizedApiRequest
         return [
             'name' => ['required', 'string', 'max:100', 'unique:scooter_models,name'],
         ];
+    }
+
+    /**
+     * Возвращает DTO с валидированными данными для создания модели самоката.
+     */
+    public function toScooterModelData(): ScooterModelData
+    {
+        return ScooterModelData::fromValidated($this->validated());
     }
 }

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ScooterModel extends Model
 {
+    protected $table = 'scooter_models';
+
     protected $fillable = [
         'name',
     ];

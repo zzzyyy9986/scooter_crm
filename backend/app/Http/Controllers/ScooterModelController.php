@@ -37,7 +37,7 @@ class ScooterModelController extends Controller
     public function store(StoreScooterModelRequest $request): JsonResponse
     {
         return $this->handleServiceCall(
-            fn () => $this->scooterModelService->create($request->validated()),
+            fn () => $this->scooterModelService->create($request->toScooterModelData()),
             201,
         );
     }

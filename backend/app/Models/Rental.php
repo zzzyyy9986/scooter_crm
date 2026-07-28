@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Rental extends Model
 {
+    protected $table = 'rentals';
+
     public const STATUS_ACTIVE = 'active';
     public const STATUS_COMPLETED = 'completed';
 

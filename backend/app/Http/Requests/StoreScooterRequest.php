@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Data\ScooterData;
 use App\Models\Scooter;
 use Illuminate\Validation\Rule;
 
@@ -22,5 +23,13 @@ class StoreScooterRequest extends AuthorizedApiRequest
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
         ];
+    }
+
+    /**
+     * Возвращает DTO с валидированными данными для создания самоката.
+     */
+    public function toScooterData(): ScooterData
+    {
+        return ScooterData::fromValidated($this->validated());
     }
 }

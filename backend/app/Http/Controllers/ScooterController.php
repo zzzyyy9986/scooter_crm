@@ -44,7 +44,7 @@ class ScooterController extends Controller
     public function store(StoreScooterRequest $request): JsonResponse
     {
         return $this->handleServiceCall(
-            fn () => $this->scooterService->create($request->validated()),
+            fn () => $this->scooterService->create($request->toScooterData()),
             201,
         );
     }
@@ -70,7 +70,10 @@ class ScooterController extends Controller
     public function update(UpdateScooterRequest $request, Scooter $scooter): JsonResponse
     {
         return $this->handleServiceCall(
-            fn () => $this->scooterService->update($scooter, $request->validated()),
+            fn () => $this->scooterService->update(
+                $scooter,
+                $request->toUpdateScooterData(),
+            ),
         );
     }
 

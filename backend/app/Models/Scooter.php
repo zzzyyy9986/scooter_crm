@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Scooter extends Model
 {
+    protected $table = 'scooters';
+
     public const STATUS_AVAILABLE = 'available';
     public const STATUS_IN_USE = 'in_use';
     public const STATUS_MAINTENANCE = 'maintenance';

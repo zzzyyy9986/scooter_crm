@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\ScooterModelData;
 use App\Models\ScooterModel;
 use Illuminate\Support\Collection;
 
@@ -20,11 +21,13 @@ class ScooterModelService
     /**
      * Создаёт новую модель в справочнике.
      *
-     * @param array{name: string} $data Название модели.
-     * @return ScooterModel Созданная модель.
+     * @param ScooterModelData $scooterModelData Название модели.
+     * @return ScooterModel Созданная запись справочника.
      */
-    public function create(array $data): ScooterModel
+    public function create(ScooterModelData $scooterModelData): ScooterModel
     {
-        return ScooterModel::create($data);
+        return ScooterModel::create([
+            'name' => $scooterModelData->name,
+        ]);
     }
 }
