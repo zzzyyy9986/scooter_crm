@@ -67,12 +67,16 @@ Web-интерфейс: http://localhost:8080
 git clone <repository-url> scooter-crm
 cd scooter-crm
 
+# Backend: настройки Laravel (БД, Sanctum, CORS)
+cp backend/.env.example backend/.env
+
 # Frontend: URL backend API для Vite
 cp frontend/.env.example frontend/.env.development
 
-# Backend: Docker создаст backend/.env из .env.example при первом запуске
 docker compose up --build
 ```
+
+> **Примечание:** `docker compose` при первом запуске также может создать `backend/.env` из `.env.example`, если файла нет. Явное копирование выше — рекомендуемый и понятный способ.
 
 Корневой `.env` для локальной разработки **не нужен** — переменные заданы в `docker-compose.yml`.
 
@@ -106,6 +110,7 @@ chmod +x deploy.sh
 ```bash
 git clone <repository-url> scooter-crm
 cd scooter-crm
+cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.development
 docker compose up --build
 ```
