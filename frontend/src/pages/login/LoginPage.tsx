@@ -7,6 +7,9 @@ const adminerUrl =
   import.meta.env.VITE_ADMINER_URL ??
   (import.meta.env.DEV ? 'http://localhost:8080' : undefined);
 
+const adminerDbUser = import.meta.env.VITE_ADMINER_DB_USER ?? 'scooter';
+const adminerDbName = import.meta.env.VITE_ADMINER_DB_NAME ?? 'scooter_crm';
+
 /** Страница входа в систему. */
 export const LoginPage = observer(function LoginPage() {
   const { authStore } = useRootStore();
@@ -111,8 +114,15 @@ export const LoginPage = observer(function LoginPage() {
                 Adminer — просмотр БД
               </a>
               <p className="text-muted small mb-0 mt-2">
-                Server: <code>mysql</code>, user: <code>scooter</code>, password:{' '}
-                <code>scooter</code>, database: <code>scooter_crm</code>
+                Server: <code>mysql</code>, user: <code>{adminerDbUser}</code>, database:{' '}
+                <code>{adminerDbName}</code>
+                {import.meta.env.DEV ? (
+                  <>
+                    , password: <code>scooter</code>
+                  </>
+                ) : (
+                  <> (пароль — <code>MYSQL_PASSWORD</code> из <code>.env</code> на сервере)</>
+                )}
               </p>
             </div>
           )}

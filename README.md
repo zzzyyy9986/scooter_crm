@@ -42,7 +42,7 @@ docker compose up --build
 | Adminer (БД) | http://localhost:8080 |
 | MySQL | localhost:3306 |
 
-> **Adminer** доступен только в локальном `docker-compose.yml`. На странице входа (`/login`) есть ссылка «Adminer — просмотр БД» с параметрами подключения.
+> На странице входа (`/login`) есть ссылка «Adminer — просмотр БД» с параметрами подключения.
 
 ### Параметры Adminer
 
@@ -108,6 +108,8 @@ sudo nginx -t && sudo systemctl reload nginx
 ```
 
 Обновление после `git push`: `./deploy.sh`
+
+На сервере Adminer доступен по адресу **`https://ваш-домен/adminer/`** (ссылка также на странице входа). После обновления `nginx/host.conf.example` перезагрузите Nginx на хосте.
 
 Подробнее (режимы external / standalone, SSL, команды): **[DEPLOY.md](DEPLOY.md)**
 

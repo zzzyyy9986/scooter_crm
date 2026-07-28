@@ -45,8 +45,15 @@ fi
 
 if [ ! -f frontend/.env.production ]; then
   echo "==> Создание frontend/.env.production..."
-  echo "VITE_API_URL=/api" > frontend/.env.production
 fi
+
+echo "==> Обновление frontend/.env.production..."
+cat > frontend/.env.production <<EOF
+VITE_API_URL=/api
+VITE_ADMINER_URL=/adminer/
+VITE_ADMINER_DB_USER=${MYSQL_USER:-scooter}
+VITE_ADMINER_DB_NAME=${MYSQL_DATABASE:-scooter_crm}
+EOF
 
 if [ -d .git ]; then
   echo "==> Обновление кода из git..."
@@ -94,7 +101,8 @@ if [ "${DEPLOY_MODE}" = "external" ]; then
   echo "  sudo ln -sf /etc/nginx/sites-available/scooter-crm /etc/nginx/sites-enabled/"
   echo "  sudo nginx -t && sudo systemctl reload nginx"
   echo ""
-  echo "Приложение: ${APP_URL:-http://localhost}"
+  echo "Adminer (БД): ${APP_URL:-http://localhost}/adminer/"
+  echo "  (нужен location /adminer/ в Nginx — см. nginx/host.conf.example)"
 else
   echo "Приложение доступно по адресу: ${APP_URL:-http://localhost}"
 fi

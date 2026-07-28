@@ -14,9 +14,10 @@
 ## External: Nginx на VPS, MySQL в Docker
 
 ```
-Браузер → Nginx (хост :80) → /api → 127.0.0.1:8000 (backend)
-                           → /    → 127.0.0.1:8080 (frontend)
-Backend → MySQL (контейнер, только внутри Docker-сети)
+Браузер → Nginx (хост :80) → /api     → 127.0.0.1:8000 (backend)
+                           → /adminer/ → 127.0.0.1:8081 (adminer)
+                           → /        → 127.0.0.1:8080 (frontend)
+Backend / Adminer → MySQL (контейнер, только внутри Docker-сети)
 ```
 
 Системный MySQL на `:3306` **не используется и не изменяется**.
@@ -67,8 +68,13 @@ sudo nginx -t && sudo systemctl reload nginx
 ### 4. Проверка
 
 - `http://APP_URL` в браузере
+- Adminer: `http://APP_URL/adminer/` (или ссылка на странице входа)
 - Логин: `admin@scooter-crm.local` / `password` (если `SEED_DATABASE=true`)
 - Потом: `SEED_DATABASE=false` в `.env`
+
+> **Nginx:** в `host.conf.example` есть блок `location /adminer/`. Если конфиг ставили раньше — обновите и выполните `sudo nginx -t && sudo systemctl reload nginx`.
+
+> **Adminer на production** доступен публично по `/adminer/`. Для закрытого контура рекомендуется ограничить доступ (basic auth в Nginx, VPN, IP whitelist).
 
 ### Обновление
 
