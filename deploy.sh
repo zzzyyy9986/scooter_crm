@@ -53,6 +53,7 @@ VITE_API_URL=/api
 VITE_ADMINER_URL=/adminer/
 VITE_ADMINER_DB_USER=${MYSQL_USER:-scooter}
 VITE_ADMINER_DB_NAME=${MYSQL_DATABASE:-scooter_crm}
+VITE_ADMINER_DB_PASSWORD=${MYSQL_PASSWORD:-change_me_db}
 EOF
 
 if [ -d .git ]; then

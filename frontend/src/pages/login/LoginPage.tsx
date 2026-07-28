@@ -9,6 +9,9 @@ const adminerUrl =
 
 const adminerDbUser = import.meta.env.VITE_ADMINER_DB_USER ?? 'scooter';
 const adminerDbName = import.meta.env.VITE_ADMINER_DB_NAME ?? 'scooter_crm';
+const adminerDbPassword =
+  import.meta.env.VITE_ADMINER_DB_PASSWORD ??
+  (import.meta.env.DEV ? 'scooter' : 'change_me_db');
 
 /** Страница входа в систему. */
 export const LoginPage = observer(function LoginPage() {
@@ -114,15 +117,8 @@ export const LoginPage = observer(function LoginPage() {
                 Adminer — просмотр БД
               </a>
               <p className="text-muted small mb-0 mt-2">
-                Server: <code>mysql</code>, user: <code>{adminerDbUser}</code>, database:{' '}
-                <code>{adminerDbName}</code>
-                {import.meta.env.DEV ? (
-                  <>
-                    , password: <code>scooter</code>
-                  </>
-                ) : (
-                  <> (пароль — <code>MYSQL_PASSWORD</code> из <code>.env</code> на сервере)</>
-                )}
+                Server: <code>mysql</code>, user: <code>{adminerDbUser}</code>, password:{' '}
+                <code>{adminerDbPassword}</code>, database: <code>{adminerDbName}</code>
               </p>
             </div>
           )}
