@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react-lite';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { AppLayout } from './components/layout/AppLayout';
-import { ToastContainer } from './components/ui/ToastContainer';
-import { DashboardPage } from './pages/DashboardPage';
-import { LoginPage } from './pages/LoginPage';
-import { RentalsPage } from './pages/RentalsPage';
-import { ScootersMapPage } from './pages/ScootersMapPage';
-import { ScootersPage } from './pages/ScootersPage';
+import { ProtectedRoute } from './common/auth/ProtectedRoute';
+import { AppLayout } from './common/layout/AppLayout';
+import { ToastContainer } from './common/ui/ToastContainer';
+import { DashboardPage } from './pages/dashboard/DashboardPage';
+import { LoginPage } from './pages/login/LoginPage';
+import { ScootersMapPage } from './pages/map/ScootersMapPage';
+import { RentalsPage } from './pages/rentals/RentalsPage';
+import { ScootersPage } from './pages/scooters/ScootersPage';
 import './App.css';
 
 /** Маршруты приложения: вход, аналитика, самокаты, аренды. */

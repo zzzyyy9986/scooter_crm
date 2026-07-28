@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { getErrorMessage } from '../utils/getErrorMessage';
 
 /** HTTP-клиент axios с базовым URL из переменных окружения Vite. */
 const client = axios.create({
@@ -59,12 +58,8 @@ export class QueryService {
     url: string,
     params?: Record<string, string>,
   ): Promise<T> {
-    try {
-      const response = await client.get<T>(url, { params });
-      return response.data;
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
-    }
+    const response = await client.get<T>(url, { params });
+    return response.data;
   }
 
   /**
@@ -74,12 +69,8 @@ export class QueryService {
    * @returns Тело ответа, типизированное generic-параметром T.
    */
   public static async postRequest<T>(url: string, data: object): Promise<T> {
-    try {
-      const response = await client.post<T>(url, data);
-      return response.data;
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
-    }
+    const response = await client.post<T>(url, data);
+    return response.data;
   }
 
   /**
@@ -89,12 +80,8 @@ export class QueryService {
    * @returns Тело ответа, типизированное generic-параметром T.
    */
   public static async putRequest<T>(url: string, data: object): Promise<T> {
-    try {
-      const response = await client.put<T>(url, data);
-      return response.data;
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
-    }
+    const response = await client.put<T>(url, data);
+    return response.data;
   }
 
   /**
@@ -102,12 +89,6 @@ export class QueryService {
    * @param url - Относительный путь удаляемого ресурса.
    */
   public static async deleteRequest(url: string): Promise<void> {
-    try {
-      await client.delete(url);
-    } catch (error) {
-      throw new Error(getErrorMessage(error));
-    }
+    await client.delete(url);
   }
 }
-
-export { getErrorMessage };

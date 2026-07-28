@@ -19,7 +19,7 @@ class UpdateScooterRequest extends AuthorizedApiRequest
 
         return [
             'number' => ['sometimes', 'string', 'max:50', Rule::unique('scooters', 'number')->ignore($scooterId)],
-            'model' => ['sometimes', 'string', 'max:100'],
+            'scooter_model_id' => ['sometimes', 'integer', 'exists:scooter_models,id'],
             'status' => ['sometimes', Rule::in(Scooter::STATUSES)],
             'battery_level' => ['sometimes', 'integer', 'min:0', 'max:100'],
             'latitude' => ['sometimes', 'numeric', 'between:-90,90'],

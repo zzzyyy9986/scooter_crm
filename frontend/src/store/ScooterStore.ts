@@ -1,14 +1,14 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { SEARCH_DEBOUNCE_MS } from '../constants/polling';
 import { QueryService } from '../services/QueryService';
-import type { Scooter, ScooterFormData, ScooterStatus } from '../types/api';
+import type { Scooter, ScooterFormData, ScooterModel } from '../types/api';
 import { FetchGuard } from './fetchGuard';
 import { notificationStore } from './NotificationStore';
 
 /** Значения формы по умолчанию при создании нового самоката. */
 const DEFAULT_SCOOTER_FORM: ScooterFormData = {
   number: '',
-  model: '',
+  scooter_model_id: '',
   status: 'available',
   battery_level: 80,
   latitude: 55.7558,
@@ -18,6 +18,8 @@ const DEFAULT_SCOOTER_FORM: ScooterFormData = {
 /** MobX-store списка самокатов и CRUD-операций. */
 export class ScooterStore {
   items: Scooter[] = [];
+  models: ScooterModel[] = [];
+  modelsLoading = false;
   loading = false;
   refreshing = false;
   lastUpdatedAt: Date | null = null;
@@ -73,6 +75,29 @@ export class ScooterStore {
   }
 
   /**
+   * Загружает справочник моделей самокатов.
+   * @returns Promise завершения загрузки.
+   */
+  public fetchModels(): Promise<void> {
+    return this.fetchGuard.runGuardedRequest('scooter-models', async () => {
+      this.modelsLoading = true;
+
+      try {
+        const data = await QueryService.getRequest<ScooterModel[]>('/scooter-models');
+        runInAction(() => {
+          this.models = data;
+          this.modelsLoading = false;
+        });
+      } catch (error) {
+        runInAction(() => {
+          this.modelsLoading = false;
+        });
+        notificationStore.showErrorFromUnknown(error);
+      }
+    });
+  }
+
+  /**
    * Загружает список самокатов с учётом текущих фильтров.
    * @param options.silent - Фоновое обновление без индикатора полной загрузки.
    * @returns Promise завершения загрузки.
@@ -109,6 +134,7 @@ export class ScooterStore {
 
   /** Открывает модальное окно создания самоката. */
   public openCreateModal(): void {
+    void this.fetchModels();
     this.modalOpen = true;
     this.modalMode = 'create';
     this.editingScooterId = null;
@@ -121,6 +147,7 @@ export class ScooterStore {
    * @param scooter - Редактируемый самокат.
    */
   public openEditModal(scooter: Scooter): void {
+    void this.fetchModels();
     this.modalOpen = true;
     this.modalMode = 'edit';
     this.editingScooterId = scooter.id;
@@ -183,7 +210,8 @@ export class ScooterStore {
     }
 
     try {
-      await this.deleteScooter(scooterId);
+      await QueryService.deleteRequest(`/scooters/${scooterId}`);
+      await this.fetchScooters();
       notificationStore.showSuccess('Самокат успешно удалён');
     } catch (error) {
       notificationStore.showErrorFromUnknown(error);
@@ -244,7 +272,7 @@ export class ScooterStore {
    * @param scooterFormData - Данные формы создания самоката.
    */
   private async createScooter(scooterFormData: ScooterFormData): Promise<void> {
-    await QueryService.postRequest<Scooter>('/scooters', scooterFormData);
+    await QueryService.postRequest<Scooter>('/scooters', this.buildScooterPayload(scooterFormData));
     await this.fetchScooters();
   }
 
@@ -254,17 +282,24 @@ export class ScooterStore {
    * @param scooterFormData - Обновлённые поля самоката.
    */
   private async updateScooter(scooterId: number, scooterFormData: ScooterFormData): Promise<void> {
-    await QueryService.putRequest<Scooter>(`/scooters/${scooterId}`, scooterFormData);
+    await QueryService.putRequest<Scooter>(
+      `/scooters/${scooterId}`,
+      this.buildScooterPayload(scooterFormData),
+    );
     await this.fetchScooters();
   }
 
   /**
-   * Удаляет самокат по ID и перезагружает список.
-   * @param scooterId - ID удаляемого самоката.
+   * Формирует payload для API из данных формы.
+   * @param scooterFormData - Данные формы.
    */
-  private async deleteScooter(scooterId: number): Promise<void> {
-    await QueryService.deleteRequest(`/scooters/${scooterId}`);
-    await this.fetchScooters();
+  private buildScooterPayload(scooterFormData: ScooterFormData): Omit<ScooterFormData, 'scooter_model_id'> & {
+    scooter_model_id: number;
+  } {
+    return {
+      ...scooterFormData,
+      scooter_model_id: Number(scooterFormData.scooter_model_id),
+    };
   }
 
   /**
@@ -272,17 +307,10 @@ export class ScooterStore {
    * @param scooter - Самокат из backend.
    * @returns Данные для формы.
    */
-  private mapScooterToFormData(scooter: {
-    number: string;
-    model: string;
-    status: ScooterStatus;
-    battery_level: number;
-    latitude: number;
-    longitude: number;
-  }): ScooterFormData {
+  private mapScooterToFormData(scooter: Scooter): ScooterFormData {
     return {
       number: scooter.number,
-      model: scooter.model,
+      scooter_model_id: scooter.scooter_model_id ?? '',
       status: scooter.status,
       battery_level: scooter.battery_level,
       latitude: scooter.latitude,

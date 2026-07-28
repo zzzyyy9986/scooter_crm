@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect } from 'react';
-import { BasePage } from '../components/pages/BasePage';
-import { LiveRefreshIndicator } from '../components/ui/LiveRefreshIndicator';
-import { STATUS_LABELS } from '../components/ui/StatusBadge';
-import { POLL_INTERVAL_MS } from '../constants/polling';
-import { usePolling } from '../hooks/usePolling';
-import { useRootStore } from '../store/root-store';
-import type { ScooterStatus } from '../types/api';
+import { BasePage } from '../../common/layout/BasePage';
+import { LiveRefreshIndicator } from '../../common/ui/LiveRefreshIndicator';
+import { STATUS_LABELS } from '../../common/ui/StatusBadge';
+import { POLL_INTERVAL_MS } from '../../constants/polling';
+import { usePolling } from '../../hooks/usePolling';
+import { useRootStore } from '../../store/root-store';
+import type { ScooterStatus } from '../../types/api';
 
 /** Страница дашборда с аналитикой по самокатам и арендам. */
 export const DashboardPage = observer(function DashboardPage() {

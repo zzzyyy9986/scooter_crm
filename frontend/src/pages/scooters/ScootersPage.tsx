@@ -1,15 +1,15 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect } from 'react';
-import { ScooterForm } from '../components/scooters/ScooterForm';
-import { ScooterFilters } from '../components/scooters/ScooterFilters';
-import { BasePage } from '../components/pages/BasePage';
-import { BatteryIndicator } from '../components/ui/BatteryIndicator';
-import { formatDate } from '../components/ui/formatDate';
-import { LiveRefreshIndicator } from '../components/ui/LiveRefreshIndicator';
-import { StatusBadge } from '../components/ui/StatusBadge';
-import { POLL_INTERVAL_MS } from '../constants/polling';
-import { usePolling } from '../hooks/usePolling';
-import { useRootStore } from '../store/root-store';
+import { BasePage } from '../../common/layout/BasePage';
+import { BatteryIndicator } from '../../common/ui/BatteryIndicator';
+import { formatDate } from '../../common/ui/formatDate';
+import { LiveRefreshIndicator } from '../../common/ui/LiveRefreshIndicator';
+import { StatusBadge } from '../../common/ui/StatusBadge';
+import { POLL_INTERVAL_MS } from '../../constants/polling';
+import { usePolling } from '../../hooks/usePolling';
+import { useRootStore } from '../../store/root-store';
+import { ScooterFilters } from './ScooterFilters';
+import { ScooterForm } from './ScooterForm';
 
 /** Страница управления самокатами: список, фильтры, создание и редактирование. */
 export const ScootersPage = observer(function ScootersPage() {

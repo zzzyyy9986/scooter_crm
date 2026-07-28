@@ -1,10 +1,10 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect } from 'react';
-import { RentalForm } from '../components/rentals/RentalForm';
-import { BasePage } from '../components/pages/BasePage';
-import { formatDate } from '../components/ui/formatDate';
-import { StatusBadge } from '../components/ui/StatusBadge';
-import { useRootStore } from '../store/root-store';
+import { BasePage } from '../../common/layout/BasePage';
+import { formatDate } from '../../common/ui/formatDate';
+import { StatusBadge } from '../../common/ui/StatusBadge';
+import { useRootStore } from '../../store/root-store';
+import { RentalForm } from './RentalForm';
 
 /** Страница управления арендами: список, фильтр, создание и завершение. */
 export const RentalsPage = observer(function RentalsPage() {
@@ -26,6 +26,12 @@ export const RentalsPage = observer(function RentalsPage() {
         </button>
       }
     >
+      <p className="text-muted small mb-3">
+        История аренд: один самокат может встречаться в нескольких строках. Активная аренда у
+        самоката может быть только одна — используйте фильтр «Активные», чтобы видеть только
+        текущие.
+      </p>
+
       <div className="card shadow-sm mb-4">
         <div className="card-body">
           <select

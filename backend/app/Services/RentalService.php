@@ -19,7 +19,7 @@ class RentalService
      */
     public function list(?string $status = null): Collection
     {
-        $query = Rental::with(['scooter', 'user'])->orderByDesc('started_at');
+        $query = Rental::with(['scooter.scooterModel', 'user'])->orderByDesc('started_at');
 
         if ($status) {
             $query->where('status', $status);
@@ -60,7 +60,7 @@ class RentalService
                 'user_id' => $data['user_id'],
                 'started_at' => now(),
                 'status' => Rental::STATUS_ACTIVE,
-            ])->load(['scooter', 'user']);
+            ])->load(['scooter.scooterModel', 'user']);
         });
     }
 
@@ -72,7 +72,7 @@ class RentalService
      */
     public function find(Rental $rental): Rental
     {
-        return $rental->load(['scooter', 'user']);
+        return $rental->load(['scooter.scooterModel', 'user']);
     }
 
     /**
@@ -98,6 +98,6 @@ class RentalService
             $rental->scooter->update(['status' => Scooter::STATUS_AVAILABLE]);
         });
 
-        return $rental->fresh()->load(['scooter', 'user']);
+        return $rental->fresh()->load(['scooter.scooterModel', 'user']);
     }
 }

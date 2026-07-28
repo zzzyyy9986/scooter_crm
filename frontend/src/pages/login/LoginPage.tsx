@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useRootStore } from '../store/root-store';
+import { useRootStore } from '../../store/root-store';
 
 /** Страница входа в систему. */
 export const LoginPage = observer(function LoginPage() {

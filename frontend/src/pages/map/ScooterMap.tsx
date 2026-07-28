@@ -2,10 +2,10 @@ import L from 'leaflet';
 import { useEffect } from 'react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { STATUS_LABELS } from '../ui/StatusBadge';
-import { BatteryIndicator } from '../ui/BatteryIndicator';
-import { DEFAULT_MAP_CENTER, SCOOTER_MARKER_COLORS } from './scooterMarkerColors';
+import { BatteryIndicator } from '../../common/ui/BatteryIndicator';
+import { STATUS_LABELS } from '../../common/ui/StatusBadge';
 import type { Scooter, ScooterStatus } from '../../types/api';
+import { DEFAULT_MAP_CENTER, SCOOTER_MARKER_COLORS } from './scooterMarkerColors';
 import './ScooterMap.css';
 
 interface ScooterMapProps {

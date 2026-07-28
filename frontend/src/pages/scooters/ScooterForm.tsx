@@ -43,13 +43,23 @@ export const ScooterForm = observer(function ScooterForm() {
 
       <div className="mb-3">
         <label className="form-label">Модель</label>
-        <input
-          className="form-control"
-          name="model"
-          value={scooterStore.formData.model}
+        <select
+          className="form-select"
+          name="scooter_model_id"
+          value={scooterStore.formData.scooter_model_id}
           onChange={handleFormFieldChange}
           required
-        />
+          disabled={scooterStore.modelsLoading}
+        >
+          <option value="">
+            {scooterStore.modelsLoading ? 'Загрузка...' : 'Выберите модель'}
+          </option>
+          {scooterStore.models.map((model) => (
+            <option key={model.id} value={model.id}>
+              {model.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mb-3">

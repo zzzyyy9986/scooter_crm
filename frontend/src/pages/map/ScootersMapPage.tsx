@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect } from 'react';
-import { ScooterFilters } from '../components/scooters/ScooterFilters';
-import { ScooterMap } from '../components/scooters/ScooterMap';
-import { BasePage } from '../components/pages/BasePage';
-import { LiveRefreshIndicator } from '../components/ui/LiveRefreshIndicator';
-import { POLL_INTERVAL_MS } from '../constants/polling';
-import { usePolling } from '../hooks/usePolling';
-import { useRootStore } from '../store/root-store';
+import { BasePage } from '../../common/layout/BasePage';
+import { LiveRefreshIndicator } from '../../common/ui/LiveRefreshIndicator';
+import { ScooterFilters } from '../scooters/ScooterFilters';
+import { POLL_INTERVAL_MS } from '../../constants/polling';
+import { usePolling } from '../../hooks/usePolling';
+import { useRootStore } from '../../store/root-store';
+import { ScooterMap } from './ScooterMap';
 
 /** Страница карты самокатов с фильтрами и автообновлением. */
 export const ScootersMapPage = observer(function ScootersMapPage() {

@@ -1,10 +1,19 @@
 export type ScooterStatus = 'available' | 'in_use' | 'maintenance' | 'offline';
 export type RentalStatus = 'active' | 'completed';
 
+export interface ScooterModel {
+  id: number;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Scooter {
   id: number;
   number: string;
-  model: string;
+  scooter_model_id: number | null;
+  model: string | null;
+  scooter_model?: ScooterModel;
   status: ScooterStatus;
   battery_level: number;
   latitude: number;
@@ -15,7 +24,7 @@ export interface Scooter {
 
 export interface ScooterFormData {
   number: string;
-  model: string;
+  scooter_model_id: number | '';
   status: ScooterStatus;
   battery_level: number;
   latitude: number;

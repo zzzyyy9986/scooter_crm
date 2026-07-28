@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -22,11 +23,15 @@ class Scooter extends Model
 
     protected $fillable = [
         'number',
-        'model',
+        'scooter_model_id',
         'status',
         'battery_level',
         'latitude',
         'longitude',
+    ];
+
+    protected $appends = [
+        'model',
     ];
 
     protected $casts = [
@@ -34,6 +39,14 @@ class Scooter extends Model
         'latitude' => 'float',
         'longitude' => 'float',
     ];
+
+    /**
+     * Название модели для API (из связанного справочника).
+     */
+    public function getModelAttribute(): ?string
+    {
+        return $this->scooterModel?->name;
+    }
 
     /**
      * Связь: самокат может иметь множество аренд.
@@ -53,5 +66,15 @@ class Scooter extends Model
     public function activeRental(): HasOne
     {
         return $this->hasOne(Rental::class)->where('status', Rental::STATUS_ACTIVE);
+    }
+
+    /**
+     * Связь: модель самоката из справочника.
+     *
+     * @return BelongsTo<ScooterModel, $this>
+     */
+    public function scooterModel(): BelongsTo
+    {
+        return $this->belongsTo(ScooterModel::class);
     }
 }
