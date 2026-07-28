@@ -1,7 +1,10 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect } from 'react';
 import { BasePage } from '../components/pages/BasePage';
+import { LiveRefreshIndicator } from '../components/ui/LiveRefreshIndicator';
 import { STATUS_LABELS } from '../components/ui/StatusBadge';
+import { POLL_INTERVAL_MS } from '../constants/polling';
+import { usePolling } from '../hooks/usePolling';
 import { useRootStore } from '../store/root-store';
 import type { ScooterStatus } from '../types/api';
 
@@ -13,7 +16,9 @@ export const DashboardPage = observer(function DashboardPage() {
     void analyticsStore.fetchAnalytics();
   }, [analyticsStore]);
 
-  const { data, loading, error } = analyticsStore;
+  usePolling(() => analyticsStore.refreshAnalytics(), POLL_INTERVAL_MS);
+
+  const { data, loading } = analyticsStore;
 
   if (loading && !data) {
     return (
@@ -25,7 +30,12 @@ export const DashboardPage = observer(function DashboardPage() {
 
   return (
     <BasePage title="Аналитика">
-      {error && <div className="alert alert-danger">{error}</div>}
+      <div className="mb-3">
+        <LiveRefreshIndicator
+          lastUpdatedAt={analyticsStore.lastUpdatedAt}
+          refreshing={analyticsStore.refreshing}
+        />
+      </div>
 
       {data && (
         <>

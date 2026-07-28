@@ -5,8 +5,10 @@ import { App } from './App';
 import { RootStoreContext } from './store/root-store';
 import { analyticsStore } from './store/AnalyticsStore';
 import { authStore } from './store/AuthStore';
+import { notificationStore } from './store/NotificationStore';
 import { rentalStore } from './store/RentalStore';
 import { scooterStore } from './store/ScooterStore';
+import { userStore } from './store/UserStore';
 import './index.css';
 
 /** Инициализирует приложение и восстанавливает сессию пользователя. */
@@ -21,7 +23,16 @@ function Bootstrap() {
 /** Точка входа: монтирует React-приложение с провайдером MobX store. */
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RootStoreContext.Provider value={{ authStore, analyticsStore, scooterStore, rentalStore }}>
+    <RootStoreContext.Provider
+      value={{
+        authStore,
+        analyticsStore,
+        scooterStore,
+        rentalStore,
+        userStore,
+        notificationStore,
+      }}
+    >
       <Bootstrap />
     </RootStoreContext.Provider>
   </StrictMode>,

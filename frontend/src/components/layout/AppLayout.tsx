@@ -35,11 +35,14 @@ export const AppLayout = observer(function AppLayout() {
             <NavLink to="/scooters" className={({ isActive }) => buildNavLinkClassName(isActive)}>
               Самокаты
             </NavLink>
+            <NavLink to="/map" className={({ isActive }) => buildNavLinkClassName(isActive)}>
+              Карта
+            </NavLink>
             <NavLink to="/rentals" className={({ isActive }) => buildNavLinkClassName(isActive)}>
               Аренды
             </NavLink>
             <span className="nav-link px-3 text-white-50 small">{authStore.user?.name}</span>
-            <button type="button" className="btn btn-sm btn-outline-light ms-2" onClick={handleLogout}>
+            <button type="button" className="btn btn-sm btn-outline-light ms-2" onClick={() => void handleLogout()}>
               Выйти
             </button>
           </div>

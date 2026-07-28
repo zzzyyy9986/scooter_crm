@@ -1,75 +1,47 @@
 import { observer } from 'mobx-react-lite';
-import { useEffect, useState } from 'react';
-import { ScooterForm, mapScooterToFormData } from '../components/scooters/ScooterForm';
+import { useEffect } from 'react';
+import { ScooterForm } from '../components/scooters/ScooterForm';
+import { ScooterFilters } from '../components/scooters/ScooterFilters';
 import { BasePage } from '../components/pages/BasePage';
 import { BatteryIndicator } from '../components/ui/BatteryIndicator';
 import { formatDate } from '../components/ui/formatDate';
+import { LiveRefreshIndicator } from '../components/ui/LiveRefreshIndicator';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { POLL_INTERVAL_MS } from '../constants/polling';
+import { usePolling } from '../hooks/usePolling';
 import { useRootStore } from '../store/root-store';
-import type { Scooter } from '../types/api';
-
-type ScooterModalState = null | 'create' | { type: 'edit'; scooter: Scooter };
 
 /** Страница управления самокатами: список, фильтры, создание и редактирование. */
 export const ScootersPage = observer(function ScootersPage() {
   const { scooterStore } = useRootStore();
-  const [modalState, setModalState] = useState<ScooterModalState>(null);
 
   useEffect(() => {
     void scooterStore.fetchScooters();
-  }, [scooterStore, scooterStore.search, scooterStore.statusFilter]);
+  }, [scooterStore, scooterStore.appliedSearch, scooterStore.statusFilter]);
 
-  /**
-   * Удаляет самокат после подтверждения пользователя.
-   * @param scooterId - ID самоката для удаления.
-   */
-  const handleDeleteScooter = async (scooterId: number): Promise<void> => {
-    if (!window.confirm('Удалить самокат?')) return;
-    try {
-      await scooterStore.deleteScooter(scooterId);
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Unknown error');
-    }
-  };
+  usePolling(() => scooterStore.refreshScooters(), POLL_INTERVAL_MS);
 
   return (
     <BasePage
       title="Самокаты"
       actions={
-        <button className="btn btn-primary" onClick={() => setModalState('create')}>
+        <button className="btn btn-primary" onClick={() => scooterStore.openCreateModal()}>
           + Добавить
         </button>
       }
     >
-      <div className="card shadow-sm mb-4">
+      <div className="card shadow-sm mb-3">
         <div className="card-body">
-          <div className="row g-2">
-            <div className="col-md-6">
-              <input
-                className="form-control"
-                placeholder="Поиск по номеру или модели..."
-                value={scooterStore.search}
-                onChange={(event) => scooterStore.setSearchQuery(event.target.value)}
-              />
-            </div>
-            <div className="col-md-4">
-              <select
-                className="form-select"
-                value={scooterStore.statusFilter}
-                onChange={(event) => scooterStore.setStatusFilterValue(event.target.value)}
-              >
-                <option value="">Все статусы</option>
-                <option value="available">Доступен</option>
-                <option value="in_use">В аренде</option>
-                <option value="maintenance">Обслуживание</option>
-                <option value="offline">Офлайн</option>
-              </select>
-            </div>
-          </div>
+          <ScooterFilters />
         </div>
       </div>
 
-      {scooterStore.error && <div className="alert alert-danger">{scooterStore.error}</div>}
+      <div className="mb-3">
+        <LiveRefreshIndicator
+          lastUpdatedAt={scooterStore.lastUpdatedAt}
+          refreshing={scooterStore.refreshing}
+        />
+      </div>
 
       {scooterStore.loading ? (
         <div className="text-center py-5 text-muted">Загрузка...</div>
@@ -111,13 +83,13 @@ export const ScootersPage = observer(function ScootersPage() {
                       <div className="d-flex gap-1">
                         <button
                           className="btn btn-sm btn-outline-primary"
-                          onClick={() => setModalState({ type: 'edit', scooter })}
+                          onClick={() => scooterStore.openEditModal(scooter)}
                         >
                           Изменить
                         </button>
                         <button
                           className="btn btn-sm btn-outline-danger"
-                          onClick={() => handleDeleteScooter(scooter.id)}
+                          onClick={() => void scooterStore.deleteScooterWithConfirm(scooter.id)}
                         >
                           Удалить
                         </button>
@@ -131,38 +103,21 @@ export const ScootersPage = observer(function ScootersPage() {
         </div>
       )}
 
-      {modalState && (
+      {scooterStore.modalOpen && (
         <>
           <div className="modal show d-block" tabIndex={-1}>
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">
-                    {modalState === 'create' ? 'Новый самокат' : 'Редактирование'}
-                  </h5>
+                  <h5 className="modal-title">{scooterStore.modalTitle}</h5>
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={() => setModalState(null)}
+                    onClick={() => scooterStore.closeModal()}
                   />
                 </div>
                 <div className="modal-body">
-                  <ScooterForm
-                    initial={
-                      modalState === 'create'
-                        ? undefined
-                        : mapScooterToFormData(modalState.scooter)
-                    }
-                    onSubmit={async (formData) => {
-                      if (modalState === 'create') {
-                        await scooterStore.createScooter(formData);
-                      } else {
-                        await scooterStore.updateScooter(modalState.scooter.id, formData);
-                      }
-                      setModalState(null);
-                    }}
-                    onCancel={() => setModalState(null)}
-                  />
+                  <ScooterForm />
                 </div>
               </div>
             </div>

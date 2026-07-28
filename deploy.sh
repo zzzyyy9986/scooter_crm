@@ -23,6 +23,9 @@ fi
 # shellcheck disable=SC1091
 source .env
 
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
+DEPLOY_MODE="${DEPLOY_MODE:-standalone}"
+
 if [ -z "${APP_KEY:-}" ]; then
   echo "APP_KEY не задан в .env"
   echo "Сгенерируйте ключ:"
@@ -30,19 +33,52 @@ if [ -z "${APP_KEY:-}" ]; then
   exit 1
 fi
 
-if [ -z "${MYSQL_PASSWORD:-}" ] || [ -z "${MYSQL_ROOT_PASSWORD:-}" ]; then
-  echo "Задайте MYSQL_PASSWORD и MYSQL_ROOT_PASSWORD в .env"
+if [ -z "${MYSQL_PASSWORD:-}" ]; then
+  echo "Задайте MYSQL_PASSWORD в .env"
   exit 1
 fi
 
-echo "==> Обновление кода из git..."
-git pull --ff-only
+if [ "${DEPLOY_MODE}" = "standalone" ]; then
+  if [ -z "${MYSQL_ROOT_PASSWORD:-}" ]; then
+    echo "В режиме standalone задайте MYSQL_ROOT_PASSWORD в .env"
+    exit 1
+  fi
+fi
 
+if [ ! -f frontend/.env.production ]; then
+  echo "==> Создание frontend/.env.production..."
+  echo "VITE_API_URL=/api" > frontend/.env.production
+fi
+
+if [ -d .git ]; then
+  echo "==> Обновление кода из git..."
+  git pull --ff-only
+else
+  echo "==> Пропуск git pull: каталог не является git-репозиторием."
+fi
+
+echo "==> Режим деплоя: ${DEPLOY_MODE} (${COMPOSE_FILE})"
 echo "==> Сборка и запуск контейнеров..."
-docker compose -f docker-compose.prod.yml --env-file .env up -d --build --remove-orphans
+docker compose -f "${COMPOSE_FILE}" --env-file .env up -d --build --remove-orphans
 
 echo "==> Статус сервисов:"
-docker compose -f docker-compose.prod.yml ps
+docker compose -f "${COMPOSE_FILE}" ps
 
 echo ""
-echo "Готово. Приложение доступно по адресу: ${APP_URL:-http://localhost}"
+echo "Готово."
+
+if [ "${DEPLOY_MODE}" = "external" ]; then
+  echo ""
+  echo "Backend:  http://127.0.0.1:${BACKEND_PORT:-8000}"
+  echo "Frontend: http://127.0.0.1:${FRONTEND_PORT:-8080}"
+  echo ""
+  echo "Настройте Nginx на хосте (если ещё не сделано):"
+  echo "  cp nginx/host.conf.example /etc/nginx/sites-available/scooter-crm"
+  echo "  # отредактируйте server_name, затем:"
+  echo "  sudo ln -sf /etc/nginx/sites-available/scooter-crm /etc/nginx/sites-enabled/"
+  echo "  sudo nginx -t && sudo systemctl reload nginx"
+  echo ""
+  echo "Приложение: ${APP_URL:-http://localhost}"
+else
+  echo "Приложение доступно по адресу: ${APP_URL:-http://localhost}"
+fi

@@ -80,30 +80,27 @@ docker compose up --build
 
 Корневой `.env` для локальной разработки **не нужен** — переменные заданы в `docker-compose.yml`.
 
-### Production (сервер)
+### Production (сервер, Git + Docker)
+
+**MySQL и Nginx уже на VPS** — режим `external` (по умолчанию в `.env.prod.example`):
 
 ```bash
-git clone <repository-url> scooter-crm
+git clone https://github.com/zzzyyy9986/scooter_crm.git scooter-crm
 cd scooter-crm
 
-# Корневой .env для docker-compose.prod.yml
+mysql -u root -p < scripts/init-host-mysql.sql   # подготовить БД
 cp .env.prod.example .env
-nano .env   # APP_KEY, APP_URL, MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD
-
-# Frontend: API через nginx на том же домене
-echo "VITE_API_URL=/api" > frontend/.env.production
+nano .env
 
 chmod +x deploy.sh
 ./deploy.sh
+
+# Nginx на хосте — см. nginx/host.conf.example
 ```
 
-Обязательные поля в `.env` на сервере:
+Подробно: [DEPLOY.md](DEPLOY.md)
 
-- `APP_KEY` — сгенерировать (см. [DEPLOY.md](DEPLOY.md))
-- `APP_URL` — IP или домен сервера
-- `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` — надёжные пароли
-
-Отдельный `backend/.env` на сервере **не нужен** — backend получает переменные из корневого `.env` через Docker.
+**Чистый VPS без MySQL/Nginx** — в `.env` переключите на `DEPLOY_MODE=standalone`.
 
 ## Быстрый запуск
 
@@ -150,18 +147,22 @@ docker compose down
 docker compose down -v
 ```
 
-## Деплой на сервер (Ubuntu + Docker)
+## Деплой на сервер (Git + Docker)
 
 Подробная инструкция: [DEPLOY.md](DEPLOY.md)
 
+**MySQL и Nginx уже на VPS** (режим `external`):
+
 ```bash
-git clone <repository-url> scooter-crm
+git clone https://github.com/zzzyyy9986/scooter_crm.git scooter-crm
 cd scooter-crm
-cp .env.prod.example .env          # заполнить APP_KEY, пароли, APP_URL
-echo "VITE_API_URL=/api" > frontend/.env.production
-chmod +x deploy.sh
+mysql -u root -p < scripts/init-host-mysql.sql
+cp .env.prod.example .env && nano .env
 ./deploy.sh
+# затем nginx/host.conf.example → конфиг Nginx на хосте
 ```
+
+Обновление: `./deploy.sh`
 
 ## Структура проекта
 
@@ -214,13 +215,14 @@ scooter-crm/
 - Создание и завершение аренд
 - Список активных и завершённых аренд
 - Дашборд: самокаты по статусам, активные аренды, средний заряд
-- Поиск и фильтрация самокатов (базовая, на стороне API)
+- Поиск и фильтрация самокатов (API + debounce на frontend)
+- Карта самокатов (OpenStreetMap + Leaflet), маркеры по статусу
+- Автообновление статусов через polling (10 сек) на аналитике, списке и карте
 - Валидация данных на backend
 - Тестовые данные (seeder)
 
-### Не реализовано (п.4 ТЗ — по запросу)
-- Карта с самокатами
-- Real-time обновления (WebSocket/polling)
+### Не реализовано (по запросу)
+- WebSocket / SSE для real-time (сейчас polling)
 
 ## Архитектурные решения
 

@@ -1,8 +1,10 @@
 import { createContext, useContext } from 'react';
 import { analyticsStore } from './AnalyticsStore';
 import { authStore } from './AuthStore';
+import { notificationStore } from './NotificationStore';
 import { rentalStore } from './RentalStore';
 import { scooterStore } from './ScooterStore';
+import { userStore } from './UserStore';
 
 /** React Context с singleton-экземплярами MobX store. */
 export const RootStoreContext = createContext({
@@ -10,11 +12,13 @@ export const RootStoreContext = createContext({
   analyticsStore,
   scooterStore,
   rentalStore,
+  userStore,
+  notificationStore,
 });
 
 /**
  * Хук для доступа ко всем store из React-компонентов.
- * @returns Объект с authStore, analyticsStore, scooterStore и rentalStore.
+ * @returns Объект со всеми store приложения.
  */
 export function useRootStore() {
   return useContext(RootStoreContext);

@@ -1,56 +1,27 @@
 import { observer } from 'mobx-react-lite';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { RentalForm } from '../components/rentals/RentalForm';
 import { BasePage } from '../components/pages/BasePage';
 import { formatDate } from '../components/ui/formatDate';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { QueryService } from '../services/QueryService';
 import { useRootStore } from '../store/root-store';
-import type { User } from '../types/api';
 
 /** Страница управления арендами: список, фильтр, создание и завершение. */
 export const RentalsPage = observer(function RentalsPage() {
-  const { rentalStore, scooterStore } = useRootStore();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
-  const [usersLoading, setUsersLoading] = useState(false);
+  const { rentalStore, scooterStore, userStore } = useRootStore();
 
   useEffect(() => {
     void rentalStore.fetchRentals();
   }, [rentalStore, rentalStore.statusFilter]);
 
-  useEffect(() => {
-    if (isCreateModalOpen) {
-      scooterStore.setStatusFilterValue('available');
-      scooterStore.setSearchQuery('');
-      void scooterStore.fetchScooters();
-      setUsersLoading(true);
-      void QueryService.getRequest<User[]>('/users')
-        .then(setUsers)
-        .finally(() => setUsersLoading(false));
-    }
-  }, [isCreateModalOpen, scooterStore]);
-
-  const availableScooters = scooterStore.items.filter((scooter) => scooter.status === 'available');
-
-  /**
-   * Завершает активную аренду после подтверждения пользователя.
-   * @param rentalId - ID аренды для завершения.
-   */
-  const handleCompleteRental = async (rentalId: number): Promise<void> => {
-    if (!window.confirm('Завершить аренду?')) return;
-    try {
-      await rentalStore.completeRental(rentalId);
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Unknown error');
-    }
-  };
-
   return (
     <BasePage
       title="Аренды"
       actions={
-        <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
+        <button
+          className="btn btn-primary"
+          onClick={() => void rentalStore.openCreateModal(scooterStore, userStore)}
+        >
           + Новая аренда
         </button>
       }
@@ -69,8 +40,6 @@ export const RentalsPage = observer(function RentalsPage() {
           </select>
         </div>
       </div>
-
-      {rentalStore.error && <div className="alert alert-danger">{rentalStore.error}</div>}
 
       {rentalStore.loading ? (
         <div className="text-center py-5 text-muted">Загрузка...</div>
@@ -110,7 +79,7 @@ export const RentalsPage = observer(function RentalsPage() {
                       {rental.status === 'active' && (
                         <button
                           className="btn btn-sm btn-outline-success"
-                          onClick={() => handleCompleteRental(rental.id)}
+                          onClick={() => void rentalStore.completeRentalWithConfirm(rental.id)}
                         >
                           Завершить
                         </button>
@@ -124,7 +93,7 @@ export const RentalsPage = observer(function RentalsPage() {
         </div>
       )}
 
-      {isCreateModalOpen && (
+      {rentalStore.isCreateModalOpen && (
         <>
           <div className="modal show d-block" tabIndex={-1}>
             <div className="modal-dialog modal-dialog-centered">
@@ -134,26 +103,18 @@ export const RentalsPage = observer(function RentalsPage() {
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={() => setIsCreateModalOpen(false)}
+                    onClick={() => rentalStore.closeCreateModal()}
                   />
                 </div>
                 <div className="modal-body">
-                  {availableScooters.length === 0 ? (
+                  {scooterStore.availableScooters.length === 0 ? (
                     <div className="alert alert-warning mb-0">Нет доступных самокатов</div>
-                  ) : usersLoading ? (
+                  ) : userStore.loading ? (
                     <div className="text-center py-3 text-muted">Загрузка пользователей...</div>
-                  ) : users.length === 0 ? (
+                  ) : userStore.items.length === 0 ? (
                     <div className="alert alert-warning mb-0">Нет пользователей для аренды</div>
                   ) : (
-                    <RentalForm
-                      availableScooters={availableScooters}
-                      users={users}
-                      onSubmit={async (formData) => {
-                        await rentalStore.createRental(formData);
-                        setIsCreateModalOpen(false);
-                      }}
-                      onCancel={() => setIsCreateModalOpen(false)}
-                    />
+                    <RentalForm />
                   )}
                 </div>
               </div>

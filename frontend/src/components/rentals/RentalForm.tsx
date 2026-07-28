@@ -1,67 +1,44 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
-import type { RentalFormData, Scooter, User } from '../../types/api';
+import { observer } from 'mobx-react-lite';
+import type { ChangeEvent, FormEvent } from 'react';
+import { useRootStore } from '../../store/root-store';
 
-interface RentalFormProps {
-  availableScooters: Scooter[];
-  users: User[];
-  onSubmit: (data: RentalFormData) => Promise<void>;
-  onCancel: () => void;
-}
-
-/**
- * Форма создания новой аренды самоката.
- * @param availableScooters - Список доступных для аренды самокатов.
- * @param users - Список пользователей для выбора арендатора.
- * @param onSubmit - Callback создания аренды с данными формы.
- * @param onCancel - Callback закрытия формы без сохранения.
- */
-export function RentalForm({ availableScooters, users, onSubmit, onCancel }: RentalFormProps) {
-  const [formData, setFormData] = useState({ scooter_id: '', user_id: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+/** Форма создания новой аренды самоката. */
+export const RentalForm = observer(function RentalForm() {
+  const { rentalStore, scooterStore, userStore } = useRootStore();
 
   /**
    * Обновляет поле формы при вводе пользователя.
-   * @param event - Событие изменения input/select.
+   * @param event - Событие изменения select.
    */
-  const handleFormFieldChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
-    setFormData((previous) => ({ ...previous, [event.target.name]: event.target.value }));
+  const handleFormFieldChange = (event: ChangeEvent<HTMLSelectElement>): void => {
+    rentalStore.setFormField(
+      event.target.name as 'scooter_id' | 'user_id',
+      event.target.value,
+    );
   };
 
   /**
-   * Отправляет форму и создаёт аренду через callback onSubmit.
+   * Отправляет форму создания аренды.
    * @param event - Событие submit формы.
    */
   const handleFormSubmit = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
-    setIsSubmitting(true);
-    setErrorMessage(null);
-    try {
-      await onSubmit({
-        scooter_id: parseInt(formData.scooter_id, 10),
-        user_id: parseInt(formData.user_id, 10),
-      });
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
-      setIsSubmitting(false);
-    }
+    await rentalStore.submitCreateForm();
   };
 
   return (
     <form onSubmit={handleFormSubmit}>
-      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
-
       <div className="mb-3">
         <label className="form-label">Самокат</label>
         <select
           className="form-select"
           name="scooter_id"
-          value={formData.scooter_id}
+          value={rentalStore.formData.scooter_id}
           onChange={handleFormFieldChange}
           required
         >
           <option value="">Выберите самокат</option>
-          {availableScooters.map((scooter) => (
+          {scooterStore.availableScooters.map((scooter) => (
             <option key={scooter.id} value={scooter.id}>
               {scooter.number} — {scooter.model} ({scooter.battery_level}%)
             </option>
@@ -74,12 +51,12 @@ export function RentalForm({ availableScooters, users, onSubmit, onCancel }: Ren
         <select
           className="form-select"
           name="user_id"
-          value={formData.user_id}
+          value={rentalStore.formData.user_id}
           onChange={handleFormFieldChange}
           required
         >
           <option value="">Выберите пользователя</option>
-          {users.map((user) => (
+          {userStore.items.map((user) => (
             <option key={user.id} value={user.id}>
               {user.name} ({user.email})
             </option>
@@ -88,13 +65,17 @@ export function RentalForm({ availableScooters, users, onSubmit, onCancel }: Ren
       </div>
 
       <div className="d-flex justify-content-end gap-2">
-        <button type="button" className="btn btn-outline-secondary" onClick={onCancel}>
+        <button
+          type="button"
+          className="btn btn-outline-secondary"
+          onClick={() => rentalStore.closeCreateModal()}
+        >
           Отмена
         </button>
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Создание...' : 'Создать аренду'}
+        <button type="submit" className="btn btn-primary" disabled={rentalStore.formSubmitting}>
+          {rentalStore.formSubmitting ? 'Создание...' : 'Создать аренду'}
         </button>
       </div>
     </form>
   );
-}
+});

@@ -1,7 +1,5 @@
 import axios from 'axios';
-import type { ApiErrorBody } from '../types/api';
-
-const AUTH_TOKEN_KEY = 'auth_token';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
 /** HTTP-клиент axios с базовым URL из переменных окружения Vite. */
 const client = axios.create({
@@ -12,7 +10,7 @@ const client = axios.create({
   },
 });
 
-let authToken: string | null = localStorage.getItem(AUTH_TOKEN_KEY);
+let authToken: string | null = localStorage.getItem('auth_token');
 let onUnauthorized: (() => void) | null = null;
 
 client.interceptors.request.use((config) => {
@@ -34,31 +32,15 @@ client.interceptors.response.use(
   },
 );
 
-/**
- * Преобразует ошибку axios или JavaScript в читаемое сообщение для UI.
- * @param error - Исходная ошибка из блока catch.
- * @returns Текст ошибки для отображения пользователю.
- */
-function extractErrorMessage(error: unknown): string {
-  if (axios.isAxiosError<ApiErrorBody>(error)) {
-    const data = error.response?.data;
-    if (data?.message) return data.message;
-    if (data?.errors) return Object.values(data.errors).flat().join(', ');
-    return `Request failed (${error.response?.status ?? 'network'})`;
-  }
-  if (error instanceof Error) return error.message;
-  return 'Unknown error';
-}
-
 /** Сервис HTTP-запросов к backend API. */
 export class QueryService {
   /** Устанавливает Bearer token для последующих запросов. */
   public static setAuthToken(token: string | null): void {
     authToken = token;
     if (token) {
-      localStorage.setItem(AUTH_TOKEN_KEY, token);
+      localStorage.setItem('auth_token', token);
     } else {
-      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem('auth_token');
     }
   }
 
@@ -81,7 +63,7 @@ export class QueryService {
       const response = await client.get<T>(url, { params });
       return response.data;
     } catch (error) {
-      throw new Error(extractErrorMessage(error));
+      throw new Error(getErrorMessage(error));
     }
   }
 
@@ -96,7 +78,7 @@ export class QueryService {
       const response = await client.post<T>(url, data);
       return response.data;
     } catch (error) {
-      throw new Error(extractErrorMessage(error));
+      throw new Error(getErrorMessage(error));
     }
   }
 
@@ -111,7 +93,7 @@ export class QueryService {
       const response = await client.put<T>(url, data);
       return response.data;
     } catch (error) {
-      throw new Error(extractErrorMessage(error));
+      throw new Error(getErrorMessage(error));
     }
   }
 
@@ -123,7 +105,9 @@ export class QueryService {
     try {
       await client.delete(url);
     } catch (error) {
-      throw new Error(extractErrorMessage(error));
+      throw new Error(getErrorMessage(error));
     }
   }
 }
+
+export { getErrorMessage };

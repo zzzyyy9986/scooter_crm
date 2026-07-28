@@ -1,19 +1,25 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { QueryService } from '../services/QueryService';
 import type { LoginFormData, LoginResponse, User } from '../types/api';
+import { notificationStore } from './NotificationStore';
 
 /** MobX-store аутентификации пользователя. */
 export class AuthStore {
   user: User | null = null;
   token: string | null = null;
   loading = false;
-  error: string | null = null;
   initialized = false;
+
+  loginEmail = '';
+  loginPassword = '';
 
   /** Регистрирует store как observable для MobX. */
   public constructor() {
     makeAutoObservable(this);
-    QueryService.setOnUnauthorized(() => this.clearSession());
+    QueryService.setOnUnauthorized(() => {
+      this.clearSession();
+      notificationStore.showError('Сессия истекла. Войдите снова.');
+    });
   }
 
   /** Пользователь авторизован и имеет действующий token. */
@@ -52,12 +58,30 @@ export class AuthStore {
   }
 
   /**
-   * Выполняет вход по email и паролю.
-   * @param credentials - Email и пароль пользователя.
+   * Обновляет поле формы входа.
+   * @param fieldName - Имя поля (`email` или `password`).
+   * @param fieldValue - Новое значение поля.
    */
-  public async login(credentials: LoginFormData): Promise<void> {
+  public setLoginField(fieldName: 'email' | 'password', fieldValue: string): void {
+    if (fieldName === 'email') {
+      this.loginEmail = fieldValue;
+      return;
+    }
+
+    this.loginPassword = fieldValue;
+  }
+
+  /**
+   * Выполняет вход по данным формы.
+   * @returns Promise успешности входа.
+   */
+  public async submitLogin(): Promise<boolean> {
     this.loading = true;
-    this.error = null;
+
+    const credentials: LoginFormData = {
+      email: this.loginEmail,
+      password: this.loginPassword,
+    };
 
     try {
       const response = await QueryService.postRequest<LoginResponse>('/login', credentials);
@@ -67,12 +91,14 @@ export class AuthStore {
         this.user = response.user;
         this.loading = false;
       });
+      notificationStore.showSuccess('Вход выполнен успешно');
+      return true;
     } catch (error) {
       runInAction(() => {
-        this.error = error instanceof Error ? error.message : 'Unknown error';
         this.loading = false;
       });
-      throw error;
+      notificationStore.showErrorFromUnknown(error);
+      return false;
     }
   }
 
@@ -88,6 +114,7 @@ export class AuthStore {
       // Игнорируем ошибки logout — локальная сессия всё равно сбрасывается.
     } finally {
       this.clearSession();
+      notificationStore.showSuccess('Вы вышли из системы');
     }
   }
 
@@ -97,7 +124,6 @@ export class AuthStore {
     runInAction(() => {
       this.token = null;
       this.user = null;
-      this.error = null;
     });
   }
 }

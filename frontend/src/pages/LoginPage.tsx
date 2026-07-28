@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useRootStore } from '../store/root-store';
 
@@ -8,7 +8,6 @@ export const LoginPage = observer(function LoginPage() {
   const { authStore } = useRootStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const [formData, setFormData] = useState({ email: '', password: '' });
 
   const redirectPath =
     (location.state as { from?: string } | null)?.from ?? '/';
@@ -22,7 +21,10 @@ export const LoginPage = observer(function LoginPage() {
    * @param event - Событие изменения input.
    */
   const handleFieldChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setFormData((previous) => ({ ...previous, [event.target.name]: event.target.value }));
+    authStore.setLoginField(
+      event.target.name as 'email' | 'password',
+      event.target.value,
+    );
   };
 
   /**
@@ -31,11 +33,9 @@ export const LoginPage = observer(function LoginPage() {
    */
   const handleSubmit = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
-    try {
-      await authStore.login(formData);
+    const isSuccess = await authStore.submitLogin();
+    if (isSuccess) {
       navigate(redirectPath, { replace: true });
-    } catch {
-      // Ошибка отображается через authStore.error.
     }
   };
 
@@ -54,8 +54,6 @@ export const LoginPage = observer(function LoginPage() {
           <h1 className="h4 mb-1 text-center">Scooter CRM</h1>
           <p className="text-muted text-center mb-4">Вход в систему</p>
 
-          {authStore.error && <div className="alert alert-danger">{authStore.error}</div>}
-
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <label className="form-label" htmlFor="email">
@@ -66,7 +64,7 @@ export const LoginPage = observer(function LoginPage() {
                 className="form-control"
                 type="email"
                 name="email"
-                value={formData.email}
+                value={authStore.loginEmail}
                 onChange={handleFieldChange}
                 autoComplete="email"
                 required
@@ -82,7 +80,7 @@ export const LoginPage = observer(function LoginPage() {
                 className="form-control"
                 type="password"
                 name="password"
-                value={formData.password}
+                value={authStore.loginPassword}
                 onChange={handleFieldChange}
                 autoComplete="current-password"
                 required
