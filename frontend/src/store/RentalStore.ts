@@ -18,6 +18,7 @@ export class RentalStore {
   formSubmitting = false;
   clientSearchLoading = false;
   clientSuggestions: Client[] = [];
+  clientSearchCompleted = false;
 
   private fetchGuard = new FetchGuard();
   private phoneSearchTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -54,6 +55,7 @@ export class RentalStore {
     this.formSubmitting = false;
     this.clientSearchLoading = false;
     this.clientSuggestions = [];
+    this.clientSearchCompleted = false;
 
     await scooterStore.prepareAvailableScooters();
   }
@@ -64,6 +66,7 @@ export class RentalStore {
     this.formSubmitting = false;
     this.clientSearchLoading = false;
     this.clientSuggestions = [];
+    this.clientSearchCompleted = false;
     this.clearPhoneSearchTimeout();
   }
 
@@ -81,6 +84,7 @@ export class RentalStore {
         this.formData = { ...this.formData, phone: '', name: '' };
         this.clientSuggestions = [];
         this.clientSearchLoading = false;
+        this.clientSearchCompleted = false;
         this.clearPhoneSearchTimeout();
         return;
       }
@@ -104,6 +108,7 @@ export class RentalStore {
       name: client.name,
     };
     this.clientSuggestions = [];
+    this.clientSearchCompleted = false;
   }
 
   /**
@@ -167,6 +172,7 @@ export class RentalStore {
   private async searchClientsByPhone(phone: string): Promise<void> {
     runInAction(() => {
       this.clientSearchLoading = true;
+      this.clientSearchCompleted = false;
     });
 
     try {
@@ -177,6 +183,7 @@ export class RentalStore {
       runInAction(() => {
         this.clientSuggestions = clients;
         this.clientSearchLoading = false;
+        this.clientSearchCompleted = true;
 
         if (clients.length === 1) {
           this.formData = { ...this.formData, name: clients[0].name };
@@ -186,6 +193,7 @@ export class RentalStore {
       runInAction(() => {
         this.clientSuggestions = [];
         this.clientSearchLoading = false;
+        this.clientSearchCompleted = true;
       });
     }
   }

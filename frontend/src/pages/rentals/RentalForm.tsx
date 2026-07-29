@@ -1,10 +1,24 @@
 import { observer } from 'mobx-react-lite';
 import type { ChangeEvent, FormEvent } from 'react';
+import {
+  AutocompleteField,
+  type AutocompleteOption,
+} from '../../common/ui/AutocompleteField';
 import { useRootStore } from '../../store/root-store';
+import type { Client } from '../../types/api';
 
 /** Форма создания новой аренды самоката. */
 export const RentalForm = observer(function RentalForm() {
   const { rentalStore, scooterStore } = useRootStore();
+
+  const clientOptions: AutocompleteOption<Client>[] = rentalStore.clientSuggestions.map(
+    (client) => ({
+      id: client.id,
+      label: client.phone,
+      sublabel: client.name,
+      value: client,
+    }),
+  );
 
   /**
    * Обновляет поле формы при вводе пользователя.
@@ -48,37 +62,26 @@ export const RentalForm = observer(function RentalForm() {
         </select>
       </div>
 
-      <div className="mb-3 position-relative">
-        <label className="form-label">Телефон клиента</label>
-        <input
-          className="form-control"
+      <div className="mb-3">
+        <AutocompleteField
+          label="Телефон клиента"
           name="phone"
           type="tel"
           value={rentalStore.formData.phone}
-          onChange={handleFormFieldChange}
-          autoComplete="off"
+          options={clientOptions}
+          loading={rentalStore.clientSearchLoading}
           required
+          minLengthToOpen={1}
+          showEmptyState={
+            rentalStore.clientSearchCompleted &&
+            !rentalStore.clientSearchLoading &&
+            rentalStore.clientSuggestions.length === 0
+          }
+          hint="Начните вводить номер с +7 или 8 — появятся подсказки из базы"
+          emptyMessage="Клиенты не найдены — введите имя ниже для нового клиента"
+          onValueChange={(phone) => rentalStore.setFormField('phone', phone)}
+          onOptionSelect={(option) => rentalStore.selectClientSuggestion(option.value)}
         />
-        <div className="form-text">Начните вводить номер, начиная с +7 или 8</div>
-        {rentalStore.clientSearchLoading && (
-          <div className="form-text">Поиск клиентов...</div>
-        )}
-        {rentalStore.clientSuggestions.length > 0 && (
-          <ul className="list-group position-absolute w-100 shadow-sm mt-1 z-3">
-            {rentalStore.clientSuggestions.map((client) => (
-              <li key={client.id}>
-                <button
-                  type="button"
-                  className="list-group-item list-group-item-action py-2"
-                  onClick={() => rentalStore.selectClientSuggestion(client)}
-                >
-                  <div className="fw-semibold">{client.phone}</div>
-                  <div className="small text-muted">{client.name}</div>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       <div className="mb-3">
@@ -92,7 +95,7 @@ export const RentalForm = observer(function RentalForm() {
           required
         />
         <div className="form-text">
-          Выберите клиента из списка или введите имя для нового клиента.
+          Заполнится автоматически при выборе клиента или введите вручную для нового.
         </div>
       </div>
 
