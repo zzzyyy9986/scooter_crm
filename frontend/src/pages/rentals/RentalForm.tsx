@@ -96,15 +96,19 @@ export const RentalForm = observer(function RentalForm() {
         </div>
       </div>
 
-      <div className="d-flex justify-content-end gap-2">
+      <div className="d-flex flex-column flex-sm-row justify-content-end gap-2">
         <button
           type="button"
-          className="btn btn-outline-secondary"
+          className="btn btn-outline-secondary w-100 w-sm-auto"
           onClick={() => rentalStore.closeCreateModal()}
         >
           Отмена
         </button>
-        <button type="submit" className="btn btn-primary" disabled={rentalStore.formSubmitting}>
+        <button
+          type="submit"
+          className="btn btn-primary w-100 w-sm-auto"
+          disabled={rentalStore.formSubmitting}
+        >
           {rentalStore.formSubmitting ? 'Создание...' : 'Создать аренду'}
         </button>
       </div>

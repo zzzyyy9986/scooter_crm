@@ -19,7 +19,7 @@ export const RentalsPage = observer(function RentalsPage() {
       title="Аренды"
       actions={
         <button
-          className="btn btn-primary"
+          className="btn btn-primary page-action-btn"
           onClick={() => void rentalStore.openCreateModal(scooterStore)}
         >
           + Новая аренда
@@ -35,7 +35,7 @@ export const RentalsPage = observer(function RentalsPage() {
       <div className="card shadow-sm mb-4">
         <div className="card-body">
           <select
-            className="form-select"
+            className="form-select w-100 w-md-auto"
             style={{ maxWidth: 240 }}
             value={rentalStore.statusFilter}
             onChange={(event) => rentalStore.setStatusFilterValue(event.target.value)}
@@ -52,57 +52,95 @@ export const RentalsPage = observer(function RentalsPage() {
       ) : rentalStore.items.length === 0 ? (
         <div className="text-center py-5 text-muted">Аренды не найдены</div>
       ) : (
-        <div className="card shadow-sm">
-          <div className="table-responsive">
-            <table className="table table-hover mb-0 align-middle">
-              <thead className="table-light">
-                <tr>
-                  <th>ID</th>
-                  <th>Самокат</th>
-                  <th>Клиент</th>
-                  <th>Телефон</th>
-                  <th>Начало</th>
-                  <th>Окончание</th>
-                  <th>Статус</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {rentalStore.items.map((rental) => (
-                  <tr key={rental.id}>
-                    <td>{rental.id}</td>
-                    <td>
-                      {rental.scooter?.number} ({rental.scooter?.model})
-                    </td>
-                    <td>{rental.client?.name}</td>
-                    <td>{rental.client?.phone}</td>
-                    <td className="text-muted small">{formatDate(rental.started_at)}</td>
-                    <td className="text-muted small">{formatDate(rental.ended_at)}</td>
-                    <td>
+        <>
+          <div className="d-md-none">
+            <div className="vstack gap-3">
+              {rentalStore.items.map((rental) => (
+                <div key={rental.id} className="card shadow-sm">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
+                      <div>
+                        <div className="fw-semibold">
+                          {rental.scooter?.number} ({rental.scooter?.model})
+                        </div>
+                        <div className="text-muted small">Аренда #{rental.id}</div>
+                      </div>
                       <StatusBadge status={rental.status} />
-                    </td>
-                    <td>
-                      {rental.status === 'active' && (
-                        <button
-                          className="btn btn-sm btn-outline-success"
-                          onClick={() => void rentalStore.completeRentalWithConfirm(rental.id)}
-                        >
-                          Завершить
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                    <div className="small">
+                      <div className="fw-semibold">{rental.client?.name}</div>
+                      <div className="text-muted">{rental.client?.phone}</div>
+                    </div>
+                    <div className="text-muted small mt-2">
+                      <div>Начало: {formatDate(rental.started_at)}</div>
+                      <div>Окончание: {formatDate(rental.ended_at)}</div>
+                    </div>
+                    {rental.status === 'active' && (
+                      <button
+                        className="btn btn-sm btn-outline-success w-100 mt-3"
+                        onClick={() => void rentalStore.completeRentalWithConfirm(rental.id)}
+                      >
+                        Завершить
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+
+          <div className="card shadow-sm d-none d-md-block">
+            <div className="table-responsive">
+              <table className="table table-hover mb-0 align-middle">
+                <thead className="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>Самокат</th>
+                    <th>Клиент</th>
+                    <th>Телефон</th>
+                    <th>Начало</th>
+                    <th>Окончание</th>
+                    <th>Статус</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {rentalStore.items.map((rental) => (
+                    <tr key={rental.id}>
+                      <td>{rental.id}</td>
+                      <td>
+                        {rental.scooter?.number} ({rental.scooter?.model})
+                      </td>
+                      <td>{rental.client?.name}</td>
+                      <td>{rental.client?.phone}</td>
+                      <td className="text-muted small">{formatDate(rental.started_at)}</td>
+                      <td className="text-muted small">{formatDate(rental.ended_at)}</td>
+                      <td>
+                        <StatusBadge status={rental.status} />
+                      </td>
+                      <td>
+                        {rental.status === 'active' && (
+                          <button
+                            className="btn btn-sm btn-outline-success"
+                            onClick={() => void rentalStore.completeRentalWithConfirm(rental.id)}
+                          >
+                            Завершить
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {rentalStore.isCreateModalOpen && (
         <>
           <div className="modal show d-block" tabIndex={-1}>
-            <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Новая аренда</h5>

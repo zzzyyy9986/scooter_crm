@@ -14,10 +14,10 @@ export interface BasePageProps {
  */
 export function BasePage({ title, children, actions }: BasePageProps) {
   return (
-    <div className="container py-4">
-      <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div className="container py-3 py-md-4">
+      <div className="d-flex flex-wrap justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <h1 className="h3 mb-0">{title}</h1>
-        {actions}
+        {actions && <div className="w-100 w-md-auto">{actions}</div>}
       </div>
       {children}
     </div>

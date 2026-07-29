@@ -1,0 +1,22 @@
+@media (max-width: 991.98px) {
+  .app-nav .navbar-collapse {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .app-nav .navbar-nav .nav-link {
+    padding: 0.625rem 0.75rem !important;
+    border-radius: 0.375rem;
+  }
+
+  .app-nav .navbar-nav .nav-item + .nav-item {
+    margin-top: 0.125rem;
+  }
+
+  .app-nav__user-row {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+}

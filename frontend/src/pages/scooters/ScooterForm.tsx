@@ -92,7 +92,7 @@ export const ScooterForm = observer(function ScooterForm() {
       </div>
 
       <div className="row g-3 mb-3">
-        <div className="col-md-6">
+        <div className="col-12 col-md-6">
           <label className="form-label">Широта</label>
           <input
             className="form-control"
@@ -104,7 +104,7 @@ export const ScooterForm = observer(function ScooterForm() {
             required
           />
         </div>
-        <div className="col-md-6">
+        <div className="col-12 col-md-6">
           <label className="form-label">Долгота</label>
           <input
             className="form-control"
@@ -118,15 +118,19 @@ export const ScooterForm = observer(function ScooterForm() {
         </div>
       </div>
 
-      <div className="d-flex justify-content-end gap-2">
+      <div className="d-flex flex-column flex-sm-row justify-content-end gap-2">
         <button
           type="button"
-          className="btn btn-outline-secondary"
+          className="btn btn-outline-secondary w-100 w-sm-auto"
           onClick={() => scooterStore.closeModal()}
         >
           Отмена
         </button>
-        <button type="submit" className="btn btn-primary" disabled={scooterStore.formSubmitting}>
+        <button
+          type="submit"
+          className="btn btn-primary w-100 w-sm-auto"
+          disabled={scooterStore.formSubmitting}
+        >
           {scooterStore.formSubmitting ? 'Сохранение...' : 'Сохранить'}
         </button>
       </div>

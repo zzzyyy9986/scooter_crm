@@ -7,7 +7,7 @@ export const ScooterFilters = observer(function ScooterFilters() {
 
   return (
     <div className="row g-2">
-      <div className="col-md-6">
+      <div className="col-12 col-md-6">
         <input
           className="form-control"
           placeholder="Поиск по номеру или модели..."
@@ -15,7 +15,7 @@ export const ScooterFilters = observer(function ScooterFilters() {
           onChange={(event) => scooterStore.setSearchQuery(event.target.value)}
         />
       </div>
-      <div className="col-md-4">
+      <div className="col-12 col-md-4">
         <select
           className="form-select"
           value={scooterStore.statusFilter}

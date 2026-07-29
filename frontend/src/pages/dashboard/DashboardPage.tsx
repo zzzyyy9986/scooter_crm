@@ -44,7 +44,7 @@ export const DashboardPage = observer(function DashboardPage() {
               <div className="card shadow-sm h-100">
                 <div className="card-body">
                   <div className="text-muted small">Всего самокатов</div>
-                  <div className="display-6 fw-bold">{data.total_scooters}</div>
+                  <div className="fw-bold display-6">{data.total_scooters}</div>
                 </div>
               </div>
             </div>
@@ -52,7 +52,7 @@ export const DashboardPage = observer(function DashboardPage() {
               <div className="card shadow-sm h-100">
                 <div className="card-body">
                   <div className="text-muted small">Активных аренд</div>
-                  <div className="display-6 fw-bold">{data.active_rentals_count}</div>
+                  <div className="fw-bold display-6">{data.active_rentals_count}</div>
                 </div>
               </div>
             </div>
@@ -60,7 +60,7 @@ export const DashboardPage = observer(function DashboardPage() {
               <div className="card shadow-sm h-100">
                 <div className="card-body">
                   <div className="text-muted small">Средний заряд</div>
-                  <div className="display-6 fw-bold">{data.average_battery_level}%</div>
+                  <div className="fw-bold display-6">{data.average_battery_level}%</div>
                 </div>
               </div>
             </div>

@@ -45,3 +45,9 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+@media (max-width: 576px) {
+  .scooter-map {
+    height: min(55vh, 420px);
+  }
+}

@@ -58,8 +58,8 @@ export const LoginPage = observer(function LoginPage() {
   }
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div className="card shadow-sm" style={{ width: '100%', maxWidth: 420 }}>
+    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light px-3 py-4">
+      <div className="card shadow-sm w-100" style={{ maxWidth: 420 }}>
         <div className="card-body p-4">
           <h1 className="h4 mb-1 text-center">Scooter CRM</h1>
           <p className="text-muted text-center mb-4">Вход в систему</p>
